@@ -83,7 +83,7 @@
                         </div>
                         <!-- Image (Takes remaining space) -->
                         <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
-                             <img id="cut-preview-img" src="../../specs/images/cuts/regular.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                             <img id="cut-preview-img" src="./images/cuts/regular.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
                         </div>
                         <p id="cut-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Klasický rovný střih pro maximální pohodlí.</p>
                     </div>
@@ -104,7 +104,7 @@
                         </div>
                          <!-- Image -->
                         <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
-                             <img id="collar-preview-img" src="../../specs/images/collars/stand.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                             <img id="collar-preview-img" src="./images/collars/stand.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
                         </div>
                         <p id="collar-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Moderní úzký límec bez patek.</p>
                     </div>
@@ -125,7 +125,7 @@
                         </div>
                           <!-- Dynamic Image Area -->
                         <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
-                             <img id="sleeve-preview-img" src="../../specs/images/sleeves/long.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                             <img id="sleeve-preview-img" src="./images/sleeves/long.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
                         </div>
                          <p id="sleeve-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Standardní délka rukávu k zápěstí.</p>
                     </div>
@@ -147,7 +147,7 @@
 
                           <!-- Dynamic Image Area -->
                         <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
-                             <img id="cuff-preview-img" src="../../specs/images/cuffs/rounded.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                             <img id="cuff-preview-img" src="./images/cuffs/rounded.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
                         </div>
                          <p id="cuff-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Klasická kulatá manžeta s jedním knoflíčkem.</p>
                     </div>
@@ -479,13 +479,13 @@
         let imgSrc = '';
         let descText = '';
         if(cutType === 'regular') {
-            imgSrc = '../../specs/images/cuts/regular.png';
+            imgSrc = './images/cuts/regular.png';
             descText = 'Klasický rovný střih pro maximální pohodlí a volnost pohybu.';
         } else if(cutType === 'slim') {
-            imgSrc = '../../specs/images/cuts/slim.png';
+            imgSrc = './images/cuts/slim.png';
             descText = 'Mírně vypasovaný střih, který zvýrazní postavu, ale neomezuje.';
         } else if(cutType === 'slim-fit') {
-            imgSrc = '../../specs/images/cuts/extra-slim.png';
+            imgSrc = './images/cuts/extra-slim.png';
             descText = 'Štíhlý, tělo obepínající střih pro moderní a ostrý vzhled.';
         }
         
@@ -508,13 +508,13 @@
         let imgSrc = '';
         let descText = '';
         if(collarType === 'stojacek') {
-            imgSrc = '../../specs/images/collars/stand.png';
+            imgSrc = './images/collars/stand.png';
             descText = 'Moderní úzký límec bez patek, ideální pro neformální vzhled.';
         } else if(collarType === 'propnuty') {
-            imgSrc = '../../specs/images/collars/button-down.png';
+            imgSrc = './images/collars/button-down.png';
             descText = 'Límec s propínacími knoflíčky, drží tvar, sportovně-elegantní.';
         } else if(collarType === 'kent') {
-            imgSrc = '../../specs/images/collars/kent.png';
+            imgSrc = './images/collars/kent.png';
             descText = 'Klasický límec, univerzální volba pro každou příležitost.';
         }
         
@@ -536,13 +536,13 @@
         let imgSrc = '';
         let descText = '';
         if(sleeveType === 'dlouhy') {
-            imgSrc = '../../specs/images/sleeves/long.png';
+            imgSrc = './images/sleeves/long.png';
             descText = 'Standardní délka rukávu k zápěstí.';
         } else if(sleeveType === 'kratky') {
-            imgSrc = '../../specs/images/sleeves/short.png';
+            imgSrc = './images/sleeves/short.png';
             descText = 'Krátký rukáv, ideální pro letní dny.';
         } else if(sleeveType === 'ohrnovaci') {
-            imgSrc = '../../specs/images/sleeves/roll-up.png';
+            imgSrc = './images/sleeves/roll-up.png';
             descText = 'Dlouhý rukáv s možností zajištění v ohrnutém stavu.';
         }
         
@@ -564,13 +564,13 @@
         let imgSrc = '';
         let descText = '';
         if(cuffType === 'kulata') {
-            imgSrc = '../../specs/images/cuffs/rounded.png';
+            imgSrc = './images/cuffs/rounded.png';
             descText = 'Klasická kulatá manžeta s jedním knoflíčkem, nadčasová volba.';
         } else if(cuffType === 'hranata') {
-            imgSrc = '../../specs/images/cuffs/mitered.png';
+            imgSrc = './images/cuffs/mitered.png';
             descText = 'Zkosená manžeta, elegantní a formálnější varianta.';
         } else if(cuffType === 'ohrnovaci') {
-            imgSrc = '../../specs/images/cuffs/french.png';
+            imgSrc = './images/cuffs/french.png';
             descText = 'Francouzská manžeta na manžetové knoflíčky pro slavnostní příležitosti.';
         }
         
