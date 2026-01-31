@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Konfigurátor Košil - Scrolly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Playfair Display", serif;
+      }
+
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Smooth highlighting for active section */
+      .step-section {
+        opacity: 0.3;
+        transition: opacity 0.5s ease;
+        will-change: opacity;
+      }
+      .step-section.active {
+        opacity: 1;
+      }
+
+      /* Image transitions */
+      #preview-img {
+        transition:
+          transform 1s cubic-bezier(0.25, 1, 0.5, 1),
+          opacity 0.3s ease;
+        transform-origin: center center;
+      }
+
+      /* Zoom states */
+      .zoom-collar {
+        transform: scale(1.8) translateY(15%);
+      }
+      .zoom-cuff {
+        transform: scale(1.8) translateY(-15%);
+      }
+      .zoom-default {
+        transform: scale(1) translateY(0);
+      }
+    </style>
+  </head>
+  <body class="bg-white text-gray-900 overflow-hidden">
+    <div class="h-[100dvh] w-full flex flex-col md:flex-row">
+      <!-- LEFT: Scrollable Content (Desktop) / BOTTOM (Mobile) -->
+      <!-- On mobile this is order-2, on desktop order-1 -->
+      <div
+        id="scroll-container"
+        class="order-2 md:order-1 flex-1 h-full overflow-y-auto md:w-1/2 relative bg-white z-10 shadow-2xl md:shadow-none"
+      >
+        <header
+          class="p-6 md:p-12 pb-0 sticky top-0 bg-white/90 backdrop-blur-md z-20 border-b md:border-none border-gray-100"
+        >
+          <span
+            class="text-xs font-bold tracking-widest uppercase text-gray-400"
+            >Luko Košile</span
+          >
+          <h1 class="text-3xl md:text-4xl mt-2 mb-4">
+            Vytvořte si svou košili
+          </h1>
+          <div
+            class="text-xs text-black border-b border-black pb-4 uppercase tracking-wider hidden md:block"
+          >
+            Start &darr;
+          </div>
+        </header>
+
+        <div class="px-6 md:px-12 py-8 space-y-[20vh] pb-[40vh]">
+          <!-- STEP 1: Material -->
+          <section
+            id="step-material"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">01 / LÁTKA</div>
+            <h2 class="text-2xl mb-6">Vyberte materiál</h2>
+            <div class="grid grid-cols-1 gap-4">
+              <button
+                class="text-left p-6 border rounded-sm hover:bg-gray-50 transition-all border-black group relative"
+                onclick="selectOption('material', '60/40', this)"
+              >
+                <span
+                  class="block text-sm font-bold uppercase tracking-wider mb-1"
+                  >60% Bavlna / 40% Polyester</span
+                >
+                <span class="text-sm text-gray-500"
+                  >Odolná směs, snadná údržba.</span
+                >
+                <div
+                  class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300 group-hover:bg-black checkbox-indicator bg-black"
+                ></div>
+              </button>
+              <button
+                class="text-left p-6 border rounded-sm hover:bg-gray-50 transition-all border-gray-200 group relative"
+                onclick="selectOption('material', '100% Bavlna', this)"
+              >
+                <span
+                  class="block text-sm font-bold uppercase tracking-wider mb-1"
+                  >100% Bavlna Easy Care</span
+                >
+                <span class="text-sm text-gray-500"
+                  >Přírodní materiál s úpravou pro snadné žehlení.</span
+                >
+                <div
+                  class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300 group-hover:border-black checkbox-indicator"
+                ></div>
+              </button>
+            </div>
+          </section>
+
+          <!-- STEP 2: Cut -->
+          <section
+            id="step-cut"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">02 / STŘIH</div>
+            <h2 class="text-2xl mb-6">Zvolte střih</h2>
+            <div class="space-y-3">
+              <button
+                class="w-full text-left p-5 border border-black bg-gray-50 flex justify-between items-center"
+                onclick="selectOption('cut', 'regular', this)"
+              >
+                <span class="font-bold uppercase text-sm tracking-wider"
+                  >Regular</span
+                >
+                <span class="text-xs text-gray-400">Klasický</span>
+              </button>
+              <button
+                class="w-full text-left p-5 border border-gray-200 bg-white flex justify-between items-center hover:border-gray-400"
+                onclick="selectOption('cut', 'slim', this)"
+              >
+                <span
+                  class="font-bold uppercase text-sm tracking-wider text-gray-500"
+                  >Slim</span
+                >
+                <span class="text-xs text-gray-400">Vyštíhlený</span>
+              </button>
+              <button
+                class="w-full text-left p-5 border border-gray-200 bg-white flex justify-between items-center hover:border-gray-400"
+                onclick="selectOption('cut', 'slim-fit', this)"
+              >
+                <span
+                  class="font-bold uppercase text-sm tracking-wider text-gray-500"
+                  >Slim Fit</span
+                >
+                <span class="text-xs text-gray-400">Těsný</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- STEP 3: Collar (Zoom) -->
+          <section
+            id="step-collar"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="collar"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">03 / LÍMEC</div>
+            <h2 class="text-2xl mb-6">Typ límce</h2>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                class="aspect-square flex flex-col items-center justify-center border border-black bg-gray-50 p-4 text-center"
+                onclick="selectOption('collar', 'stojacek', this)"
+              >
+                <div class="w-8 h-8 rounded-full bg-gray-200 mb-3"></div>
+                <span class="text-xs font-bold uppercase">Stojáček</span>
+              </button>
+              <button
+                class="aspect-square flex flex-col items-center justify-center border border-gray-200 p-4 text-center hover:bg-gray-50"
+                onclick="selectOption('collar', 'propnuty', this)"
+              >
+                <div class="w-8 h-8 rounded-full bg-gray-200 mb-3"></div>
+                <span class="text-xs font-bold uppercase text-gray-500"
+                  >Propnutý</span
+                >
+              </button>
+              <button
+                class="aspect-square flex flex-col items-center justify-center border border-gray-200 p-4 text-center hover:bg-gray-50 col-span-2"
+                onclick="selectOption('collar', 'kent', this)"
+              >
+                <div class="w-8 h-8 rounded-full bg-gray-200 mb-3"></div>
+                <span class="text-xs font-bold uppercase text-gray-500"
+                  >Kent</span
+                >
+              </button>
+            </div>
+          </section>
+
+          <!-- STEP 4: Sleeve -->
+          <section
+            id="step-sleeve"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">04 / RUKÁV</div>
+            <h2 class="text-2xl mb-6">Délka rukávu</h2>
+            <div class="flex flex-col gap-2">
+              <button
+                class="py-4 border-b border-black text-left font-bold uppercase text-sm"
+                onclick="selectOption('sleeve', 'dlouhy', this)"
+              >
+                Dlouhý
+              </button>
+              <button
+                class="py-4 border-b border-gray-100 text-left font-bold uppercase text-sm text-gray-400 hover:text-black hover:border-gray-300"
+                onclick="selectOption('sleeve', 'kratky', this)"
+              >
+                Krátký
+              </button>
+              <button
+                class="py-4 border-b border-gray-100 text-left font-bold uppercase text-sm text-gray-400 hover:text-black hover:border-gray-300"
+                onclick="selectOption('sleeve', 'ohrnovaci', this)"
+              >
+                Ohrnovací
+              </button>
+            </div>
+          </section>
+
+          <!-- STEP 5: Cuff (Zoom) -->
+          <section
+            id="step-cuff"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="cuff"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">05 / MANŽETA</div>
+            <h2 class="text-2xl mb-6">Styl manžety</h2>
+            <div class="flex space-x-2 overflow-x-auto pb-4 hide-scrollbar">
+              <button
+                class="min-w-[120px] h-[140px] border border-black bg-gray-50 flex flex-col items-center justify-center p-4 shrink-0"
+                onclick="selectOption('cuff', 'kulata', this)"
+              >
+                <span class="text-xs font-bold uppercase">Kulatá</span>
+              </button>
+              <button
+                class="min-w-[120px] h-[140px] border border-gray-200 flex flex-col items-center justify-center p-4 shrink-0 hover:bg-gray-50"
+                onclick="selectOption('cuff', 'hranata', this)"
+              >
+                <span class="text-xs font-bold uppercase text-gray-400"
+                  >Hranatá</span
+                >
+              </button>
+              <button
+                class="min-w-[120px] h-[140px] border border-gray-200 flex flex-col items-center justify-center p-4 shrink-0 hover:bg-gray-50"
+                onclick="selectOption('cuff', 'ohrnovaci', this)"
+              >
+                <span class="text-xs font-bold uppercase text-gray-400"
+                  >Francouzská</span
+                >
+              </button>
+            </div>
+          </section>
+
+          <!-- STEP 6 + 7: Colors -->
+          <section
+            id="step-colors"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">06 / BARVY</div>
+            <h2 class="text-2xl mb-4">Barva košile</h2>
+            <div class="flex flex-wrap gap-3 mb-8">
+              <button
+                class="w-12 h-12 rounded-full border border-gray-200 bg-white ring-2 ring-black ring-offset-2"
+                onclick="selectColor('shirtColor', 'bila', this)"
+              ></button>
+              <button
+                class="w-12 h-12 rounded-full border border-gray-200 bg-black"
+                onclick="selectColor('shirtColor', 'cerna', this)"
+              ></button>
+              <button
+                class="w-12 h-12 rounded-full border border-gray-200 bg-blue-900"
+                onclick="selectColor('shirtColor', 'kralovska-modra', this)"
+              ></button>
+              <button
+                class="w-12 h-12 rounded-full border border-gray-200 bg-gray-300"
+                onclick="selectColor('shirtColor', 'svetle-seda', this)"
+              ></button>
+              <button
+                class="w-12 h-12 rounded-full border border-gray-200 bg-blue-300"
+                onclick="selectColor('shirtColor', 'svetle-modra', this)"
+              ></button>
+            </div>
+
+            <h2 class="text-xl mb-4">Barva knoflíčků</h2>
+            <div class="flex flex-wrap gap-3">
+              <button
+                class="w-10 h-10 rounded-full border border-gray-300 bg-white ring-2 ring-black ring-offset-2"
+                onclick="selectColor('buttonColor', 'bila', this)"
+              ></button>
+              <button
+                class="w-10 h-10 rounded-full border border-gray-300 bg-black"
+                onclick="selectColor('buttonColor', 'cerna', this)"
+              ></button>
+              <button
+                class="w-10 h-10 rounded-full border border-gray-300 bg-blue-600"
+                onclick="selectColor('buttonColor', 'modra', this)"
+              ></button>
+              <button
+                class="w-10 h-10 rounded-full border border-gray-300 bg-gray-400"
+                onclick="selectColor('buttonColor', 'seda', this)"
+              ></button>
+            </div>
+          </section>
+
+          <!-- STEP 8: Size -->
+          <section
+            id="step-size"
+            class="step-section min-h-[40vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">
+              07 / VELIKOST
+            </div>
+            <h2 class="text-2xl mb-6">Vaše velikost</h2>
+            <div class="grid grid-cols-4 gap-2">
+              <button
+                class="py-3 border border-black bg-black text-white text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                S
+              </button>
+              <button
+                class="py-3 border border-gray-200 text-gray-500 hover:text-black hover:border-black text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                M
+              </button>
+              <button
+                class="py-3 border border-gray-200 text-gray-500 hover:text-black hover:border-black text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                L
+              </button>
+              <button
+                class="py-3 border border-gray-200 text-gray-500 hover:text-black hover:border-black text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                XL
+              </button>
+              <button
+                class="py-3 border border-gray-200 text-gray-500 hover:text-black hover:border-black text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                XXL
+              </button>
+              <button
+                class="py-3 border border-gray-200 text-gray-500 hover:text-black hover:border-black text-sm font-bold"
+                onclick="selectSize(this)"
+              >
+                3XL
+              </button>
+            </div>
+            <div
+              class="mt-4 text-xs text-gray-400 text-center cursor-pointer hover:underline"
+            >
+              Tabulka velikostí
+            </div>
+          </section>
+
+          <!-- STEP 9: Summary & Finish -->
+          <section
+            id="step-finish"
+            class="step-section min-h-[50vh] flex flex-col justify-center"
+            data-zoom="default"
+          >
+            <div class="mb-4 text-xs font-mono text-gray-400">08 / HOTOVO</div>
+            <h2 class="text-3xl mb-8 font-serif">Vaše košile je připravena</h2>
+
+            <div class="bg-gray-50 p-6 rounded-sm mb-8 space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-500">Materiál</span
+                ><span class="font-medium" id="sum-material">60/40</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Střih</span
+                ><span class="font-medium" id="sum-cut">Regular</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Límec</span
+                ><span class="font-medium" id="sum-collar">Stojáček</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Velikost</span
+                ><span class="font-medium" id="sum-size">S</span>
+              </div>
+            </div>
+
+            <form
+              onsubmit="
+                event.preventDefault();
+                alert('Objednávka odeslána!');
+              "
+              class="space-y-4"
+            >
+              <input
+                type="text"
+                placeholder="Jméno"
+                class="w-full border-b border-gray-300 py-3 bg-transparent focus:outline-none focus:border-black transition-colors"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                class="w-full border-b border-gray-300 py-3 bg-transparent focus:outline-none focus:border-black transition-colors"
+              />
+              <button
+                class="w-full bg-black text-white py-4 mt-4 uppercase tracking-[0.2em] text-xs hover:bg-gray-800 transition shadow-lg"
+              >
+                Objednat košili
+              </button>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sticky Visual (Desktop) / TOP (Mobile) -->
+      <!-- order-1 on mobile, order-2 on desktop -->
+      <div
+        class="order-1 md:order-2 md:w-1/2 h-[40vh] md:h-full bg-[#f4f4f4] relative flex items-center justify-center overflow-hidden"
+      >
+        <div class="absolute inset-0 flex items-center justify-center">
+          <!-- Background Blob/Shape for aesthetics -->
+          <div
+            class="w-[500px] h-[500px] rounded-full bg-white blur-3xl absolute opacity-60"
+          ></div>
+
+          <!-- Main Shirt Image -->
+          <img
+            id="preview-img"
+            src="./images/cuts/regular.png"
+            class="relative w-[90%] md:w-[70%] max-h-[90%] object-contain drop-shadow-xl z-10 zoom-default"
+          />
+
+          <!-- Floating Label (Optional) -->
+          <div
+            id="visual-label"
+            class="absolute bottom-8 left-0 right-0 text-center text-xs uppercase tracking-widest text-gray-400 opacity-0 transition-opacity duration-300"
+          >
+            Pohled: Střih
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // State
+      const state = {
+        material: "60/40",
+        cut: "regular",
+        collar: "stojacek",
+        sleeve: "dlouhy",
+        cuff: "kulata",
+        buttonColor: "bila",
+        shirtColor: "bila",
+        size: "S",
+      };
+
+      // Images Mapping
+      const images = {
+        cut: {
+          regular: "./images/cuts/regular.png",
+          slim: "./images/cuts/slim.png",
+          "slim-fit": "./images/cuts/extra-slim.png",
+        },
+        collar: {
+          stojacek: "./images/collars/stand.png",
+          propnuty: "./images/collars/button-down.png",
+          kent: "./images/collars/kent.png",
+        },
+        sleeve: {
+          dlouhy: "./images/sleeves/long.png",
+          kratky: "./images/sleeves/short.png",
+          ohrnovaci: "./images/sleeves/roll-up.png",
+        },
+        cuff: {
+          kulata: "./images/cuffs/rounded.png",
+          hranata: "./images/cuffs/mitered.png",
+          ohrnovaci: "./images/cuffs/french.png",
+        },
+      };
+
+      // Update Logic
+      function updateVisuals(category) {
+        const imgEl = document.getElementById("preview-img");
+
+        // Determine which image to show based on what step we are closest to or what was clicked
+        // For simplicity in this text-based update:
+        // If we change CUT, show cut image.
+        // If we change COLLAR, show collar image.
+        // If we change SLEEVE, show sleeve image.
+        // Use fallbacks if specific category doesn't equate to a full image change in this prototype
+
+        let newSrc = null;
+        if (category === "cut" || category === "material")
+          newSrc = images.cut[state.cut];
+        if (category === "collar") newSrc = images.collar[state.collar];
+        if (category === "sleeve") newSrc = images.sleeve[state.sleeve];
+        if (category === "cuff") newSrc = images.cuff[state.cuff];
+
+        if (newSrc) {
+          imgEl.style.opacity = 0.5;
+          setTimeout(() => {
+            imgEl.src = newSrc;
+            imgEl.style.opacity = 1;
+          }, 200);
+        }
+
+        updateSummary();
+      }
+
+      function updateSummary() {
+        document.getElementById("sum-material").innerText = state.material;
+        document.getElementById("sum-cut").innerText = state.cut;
+        document.getElementById("sum-collar").innerText = state.collar;
+        document.getElementById("sum-size").innerText = state.size;
+      }
+
+      // Selection Handlers
+      window.selectOption = function (category, value, btn) {
+        state[category] = value;
+
+        // Update UI Styles
+        // Find siblings
+        const container = btn.parentElement;
+        // Reset siblings
+        if (
+          container.classList.contains("grid") ||
+          container.classList.contains("flex")
+        ) {
+          // Heuristic for siblings
+          Array.from(container.children).forEach((child) => {
+            if (child.tagName === "BUTTON") {
+              child.classList.remove(
+                "border-black",
+                "bg-gray-50",
+                "text-black",
+                "ring-2",
+                "ring-black",
+                "ring-offset-2",
+              );
+
+              // Restore specific styles based on context is annoying without frameworks.
+              // Just strictly toggling classes for the prototype:
+              if (child.querySelector(".checkbox-indicator")) {
+                child
+                  .querySelector(".checkbox-indicator")
+                  .classList.remove("bg-black", "border-transparent");
+              }
+
+              // For Color buttons (Ring logic)
+              if (child.classList.contains("rounded-full")) {
+                child.classList.remove("ring-2", "ring-black");
+              } else {
+                // Standard buttons
+                child.classList.add("border-gray-200", "text-gray-500");
+                child
+                  .querySelector("span.font-bold")
+                  ?.classList.remove("text-black");
+              }
+            }
+          });
+        }
+
+        // Set Active
+        btn.classList.remove("border-gray-200", "text-gray-500");
+        btn.classList.add("border-black", "bg-gray-50", "text-black");
+        if (btn.querySelector(".checkbox-indicator")) {
+          btn
+            .querySelector(".checkbox-indicator")
+            .classList.add("bg-black", "border-transparent");
+        }
+
+        updateVisuals(category);
+      };
+
+      window.selectColor = function (category, value, btn) {
+        state[category] = value;
+        const container = btn.parentElement;
+        Array.from(container.children).forEach((child) =>
+          child.classList.remove("ring-2", "ring-black", "ring-offset-2"),
+        );
+        btn.classList.add("ring-2", "ring-black", "ring-offset-2");
+        updateVisuals(category);
+      };
+
+      window.selectSize = function (btn) {
+        state.size = btn.innerText;
+        const container = btn.parentElement;
+        Array.from(container.children).forEach((child) => {
+          child.classList.remove("bg-black", "text-white", "border-black");
+          child.classList.add("border-gray-200", "text-gray-500");
+        });
+        btn.classList.remove("border-gray-200", "text-gray-500");
+        btn.classList.add("bg-black", "text-white", "border-black");
+        updateSummary();
+      };
+
+      // SCROLL INTERACTION (The "Scrolly" part)
+      const observerOptions = {
+        root: document.getElementById("scroll-container"),
+        threshold: 0.6, // Trigger when 60% visible
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Highlight active section
+            document
+              .querySelectorAll(".step-section")
+              .forEach((s) => s.classList.remove("active"));
+            entry.target.classList.add("active");
+
+            // Zoom Effect
+            const zoomType = entry.target.dataset.zoom || "default";
+            const imgEl = document.getElementById("preview-img");
+
+            imgEl.classList.remove("zoom-default", "zoom-collar", "zoom-cuff");
+            imgEl.classList.add("zoom-" + zoomType);
+
+            // Update Image source contextually if needed (e.g. entering Cuff section ensures Cuff image is shown)
+            // Extract id: step-collar -> collar
+            const stepId = entry.target.id.replace("step-", "");
+            if (images[stepId]) {
+              // Preload/Swap to that category's current state image
+              const currentVal = state[stepId];
+              if (currentVal && images[stepId][currentVal]) {
+                imgEl.src = images[stepId][currentVal];
+              }
+            }
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll(".step-section").forEach((section) => {
+        observer.observe(section);
+      });
+    </script>
+  </body>
+</html>

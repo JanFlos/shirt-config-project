@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurátor Košil - Minimal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .option-card.selected { border-color: black; background-color: #f9f9f9; }
+        
+        /* Shirt coloring logic - minimal for summary if needed later */
+        .shirt-base { width: 100%; display: block; }
+
+        /* Stepper */
+        .stepper-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .stepper-line {
+            height: 2px;
+            flex: 1;
+            margin-top: 12px;
+            transition: background-color 0.3s ease;
+            min-width: 4px;
+        }
+        .stepper-label {
+            font-size: 0.5rem;
+            margin-top: 4px;
+            text-align: center;
+            white-space: nowrap;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.3s ease;
+        }
+        @media (min-width: 640px) {
+            .stepper-circle {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+            .stepper-line {
+                margin-top: 15px;
+                min-width: 12px;
+            }
+            .stepper-label {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased selection:bg-gray-200 selection:text-black">
+
+<div id="app-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 h-[100dvh] h-[calc(var(--vh,1vh)*100)] grid grid-rows-[auto_1fr_auto] pb-0 overflow-hidden">
+    <!-- Header (Row 1) -->
+    <header class="bg-white shrink-0 z-10 sticky top-0 pt-4 pb-2">
+        <div class="max-w-3xl mx-auto">
+            <!-- Top Row: Brand + Title -->
+            <div class="flex justify-between items-end mb-3">
+                <div class="flex flex-col items-start">
+                    <span class="text-[0.6rem] text-gray-400 font-medium uppercase tracking-wider mb-2">LUKO KOŠILE NA MÍRU</span>
+                    <h1 id="header-section-title" class="text-xl font-normal text-black leading-none">Materiál</h1>
+                </div>
+            </div>
+
+            <!-- Stepper -->
+            <div id="stepper" class="flex items-start mb-4"></div>
+        </div>
+    </header>
+
+    <!-- Main Content (Row 2) -->
+    <div class="flex flex-col items-center min-h-0 w-full relative">
+        <div class="w-full max-w-3xl h-full">
+            <form id="config-form" onsubmit="event.preventDefault();" class="h-full flex flex-col">
+                
+                <!-- Steps Container (Takes available space) -->
+                <div class="flex-grow relative overflow-hidden flex flex-col">
+                    
+                    <!-- STEP 1: Material -->
+                    <div id="step-1" class="step-content h-full flex flex-col">
+                        <div class="shrink-0 flex flex-col space-y-3 mb-2">
+                            <button type="button" class="card-option w-full py-5 px-4 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); state.material='60/40'; updateSidebar();">
+                                60% Bavlna / 40% Polyester
+                            </button>
+                            <button type="button" class="card-option w-full py-5 px-4 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.material='100% Bavlna'; updateSidebar();">
+                                100% Bavlna Easy Care
+                            </button>
+                        </div>
+                        <div class="flex-grow"></div>
+                    </div>
+
+                    <!-- STEP 2: Cut -->
+                    <div id="step-2" class="step-content h-full hidden flex-col">
+                        <!-- Tabs -->
+                        <div class="shrink-0 flex justify-center space-x-3 mb-2">
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); updateCutView('regular', this); state.cut='regular'; updateSidebar();">
+                                Regular
+                            </button>
+                            <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCutView('slim', this); state.cut='slim'; updateSidebar();">
+                                Slim
+                            </button>
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCutView('slim-fit', this); state.cut='slim-fit'; updateSidebar();">
+                                Slim Fit
+                            </button>
+                        </div>
+                        <!-- Image (Takes remaining space) -->
+                        <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
+                             <img id="cut-preview-img" src="./images/cuts/regular.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                        </div>
+                        <p id="cut-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Klasický rovný střih pro maximální pohodlí.</p>
+                    </div>
+
+                    <!-- STEP 3: Collar -->
+                    <div id="step-3" class="step-content h-full hidden flex-col">
+                         <!-- Tabs -->
+                        <div class="shrink-0 flex justify-center space-x-3 mb-2">
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); updateCollarView('stojacek', this); state.collar='stojacek'; updateSidebar();">
+                                Stojáček
+                            </button>
+                            <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCollarView('propnuty', this); state.collar='propnuty'; updateSidebar();">
+                                Propnutý
+                            </button>
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCollarView('kent', this); state.collar='kent'; updateSidebar();">
+                                Kent
+                            </button>
+                        </div>
+                         <!-- Image -->
+                        <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
+                             <img id="collar-preview-img" src="./images/collars/stand.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                        </div>
+                        <p id="collar-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Moderní úzký límec bez patek.</p>
+                    </div>
+
+                    <!-- STEP 4: Sleeve -->
+                    <div id="step-4" class="step-content h-full hidden flex-col">
+                         <!-- Sleeve Tabs -->
+                        <div class="shrink-0 flex justify-center space-x-3 mb-2">
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); updateSleeveView('dlouhy', this); state.sleeve='dlouhy'; updateSidebar();">
+                                Dlouhý
+                            </button>
+                            <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateSleeveView('kratky', this); state.sleeve='kratky'; updateSidebar();">
+                                Krátký
+                            </button>
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateSleeveView('ohrnovaci', this); state.sleeve='ohrnovaci'; updateSidebar();">
+                                Ohrnovací
+                            </button>
+                        </div>
+                          <!-- Dynamic Image Area -->
+                        <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
+                             <img id="sleeve-preview-img" src="./images/sleeves/long.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                        </div>
+                         <p id="sleeve-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Standardní délka rukávu k zápěstí.</p>
+                    </div>
+
+                    <!-- STEP 5: Cuff -->
+                    <div id="step-5" class="step-content h-full hidden flex-col">
+                         <!-- Cuff Tabs -->
+                        <div class="shrink-0 flex justify-center space-x-3 mb-2">
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); updateCuffView('kulata', this); state.cuff='kulata'; updateSidebar();">
+                                Kulatá
+                            </button>
+                            <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCuffView('hranata', this); state.cuff='hranata'; updateSidebar();">
+                                Hranatá
+                            </button>
+                             <button type="button" class="card-option flex-1 py-4 px-3 text-xs uppercase font-bold tracking-wider rounded-lg border-2 border-transparent bg-white text-gray-400 hover:border-gray-400 hover:text-black transition-all" onclick="selectCard(this); updateCuffView('ohrnovaci', this); state.cuff='ohrnovaci'; updateSidebar();">
+                                Ohrnovací
+                            </button>
+                        </div>
+
+                          <!-- Dynamic Image Area -->
+                        <div class="flex-grow w-full bg-white flex items-center justify-center overflow-hidden relative mb-2 min-h-0">
+                             <img id="cuff-preview-img" src="./images/cuffs/rounded.png" class="absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-300">
+                        </div>
+                         <p id="cuff-desc" class="shrink-0 text-center text-xs text-gray-500 mt-0 mb-1">Klasická kulatá manžeta s jedním knoflíčkem.</p>
+                    </div>
+
+                    <!-- STEP 6: Button Color -->
+                    <div id="step-6" class="step-content h-full hidden flex-col">
+                        <div class="shrink-0 grid grid-cols-4 gap-3 mb-2">
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); state.buttonColor='bila'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-300 bg-white mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Bílá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.buttonColor='cerna'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-300 bg-black mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Černá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.buttonColor='modra'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-300 bg-blue-600 mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Modrá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.buttonColor='seda'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-300 bg-gray-400 mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Šedá</span>
+                            </button>
+                        </div>
+                        <div class="flex-grow"></div>
+                    </div>
+
+                    <!-- STEP 7: Shirt Color -->
+                    <div id="step-7" class="step-content h-full hidden flex-col">
+                        <div class="shrink-0 grid grid-cols-3 sm:grid-cols-5 gap-3 mb-2">
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-black bg-gray-50 text-black transition-all" onclick="selectCard(this); state.shirtColor='bila'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-200 bg-white mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Bílá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.shirtColor='cerna'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-200 bg-black mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider">Černá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.shirtColor='kralovska-modra'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-200 bg-blue-900 mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Král. modrá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.shirtColor='svetle-seda'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-200 bg-gray-300 mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Sv. šedá</span>
+                            </button>
+                            <button type="button" class="card-option flex flex-col items-center py-5 px-2 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all" onclick="selectCard(this); state.shirtColor='svetle-modra'; updateSidebar();">
+                                <div class="w-10 h-10 rounded-full border border-gray-200 bg-blue-300 mb-2"></div>
+                                <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Sv. modrá</span>
+                            </button>
+                        </div>
+                        <div class="flex-grow"></div>
+                    </div>
+
+                    <!-- STEP 8: Size -->
+                    <div id="step-8" class="step-content h-full hidden flex-col">
+                        <!-- Size mode tabs -->
+                        <div class="shrink-0 flex mb-4">
+                            <button type="button" id="size-tab-letter" class="flex-1 py-3 text-xs uppercase font-bold tracking-wider text-black border-b-2 border-black transition-all" onclick="switchSizeMode('letter')">
+                                Konfekční velikost
+                            </button>
+                            <button type="button" id="size-tab-neck" class="flex-1 py-3 text-xs uppercase font-bold tracking-wider text-gray-400 border-b-2 border-transparent hover:text-black transition-all" onclick="switchSizeMode('neck')">
+                                Podle obvodu krku
+                            </button>
+                        </div>
+
+                        <!-- Mode A: Letter sizes -->
+                        <div id="size-mode-letter" class="shrink-0">
+                            <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                                <button type="button" data-size="S" class="card-option py-4 px-3 rounded-lg border-2 border-black bg-gray-50 text-black flex flex-col items-center justify-center transition-all" onclick="selectSizeCard(this); state.size='S'; updateSidebar();">
+                                    <span class="text-sm font-bold">S</span>
+                                    <span class="text-[0.6rem] text-gray-400 mt-1">37/38</span>
+                                </button>
+                                <button type="button" data-size="M" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='M'; updateSidebar();">
+                                    <span class="text-sm font-bold">M</span>
+                                    <span class="text-[0.6rem] mt-1">39/40</span>
+                                </button>
+                                <button type="button" data-size="L" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='L'; updateSidebar();">
+                                    <span class="text-sm font-bold">L</span>
+                                    <span class="text-[0.6rem] mt-1">41/42</span>
+                                </button>
+                                <button type="button" data-size="XL" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='XL'; updateSidebar();">
+                                    <span class="text-sm font-bold">XL</span>
+                                    <span class="text-[0.6rem] mt-1">43/44</span>
+                                </button>
+                                <button type="button" data-size="XXL" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='XXL'; updateSidebar();">
+                                    <span class="text-sm font-bold">XXL</span>
+                                    <span class="text-[0.6rem] mt-1">45/46</span>
+                                </button>
+                                <button type="button" data-size="3XL" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='3XL'; updateSidebar();">
+                                    <span class="text-sm font-bold">3XL</span>
+                                    <span class="text-[0.6rem] mt-1">47/48</span>
+                                </button>
+                                <button type="button" data-size="4XL" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='4XL'; updateSidebar();">
+                                    <span class="text-sm font-bold">4XL</span>
+                                    <span class="text-[0.6rem] mt-1">49/50</span>
+                                </button>
+                                <button type="button" data-size="5XL" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex flex-col items-center justify-center" onclick="selectSizeCard(this); state.size='5XL'; updateSidebar();">
+                                    <span class="text-sm font-bold">5XL</span>
+                                    <span class="text-[0.6rem] mt-1">51/52</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mode B: Neck circumference -->
+                        <div id="size-mode-neck" class="shrink-0 hidden">
+                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                                <button type="button" data-size="37/38" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='37/38'; updateSidebar();">
+                                    <span class="text-sm font-bold">37/38</span>
+                                </button>
+                                <button type="button" data-size="39/40" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='39/40'; updateSidebar();">
+                                    <span class="text-sm font-bold">39/40</span>
+                                </button>
+                                <button type="button" data-size="41/42" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='41/42'; updateSidebar();">
+                                    <span class="text-sm font-bold">41/42</span>
+                                </button>
+                                <button type="button" data-size="43/44" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='43/44'; updateSidebar();">
+                                    <span class="text-sm font-bold">43/44</span>
+                                </button>
+                                <button type="button" data-size="45/46" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='45/46'; updateSidebar();">
+                                    <span class="text-sm font-bold">45/46</span>
+                                </button>
+                                <button type="button" data-size="47/48" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='47/48'; updateSidebar();">
+                                    <span class="text-sm font-bold">47/48</span>
+                                </button>
+                                <button type="button" data-size="49/50" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='49/50'; updateSidebar();">
+                                    <span class="text-sm font-bold">49/50</span>
+                                </button>
+                                <button type="button" data-size="51/52" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='51/52'; updateSidebar();">
+                                    <span class="text-sm font-bold">51/52</span>
+                                </button>
+                                <button type="button" data-size="53/54" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='53/54'; updateSidebar();">
+                                    <span class="text-sm font-bold">53/54</span>
+                                </button>
+                                <button type="button" data-size="55/56" class="card-option py-4 px-3 rounded-lg border-2 border-transparent bg-white text-gray-400 hover:text-black transition-all flex items-center justify-center" onclick="selectSizeCard(this); state.size='55/56'; updateSidebar();">
+                                    <span class="text-sm font-bold">55/56</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-[0.6rem] text-gray-300 mt-3 text-center">Čísla udávají obvod krku v cm</p>
+                        <div class="flex-grow"></div>
+                    </div>
+
+                    <!-- STEP 9: Summary -->
+                     <div id="step-9" class="step-content h-full hidden flex-col">
+                        <div class="flex-grow overflow-y-auto">
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 sm:gap-y-1.5 text-[0.7rem] sm:text-sm mb-3 sm:mb-6">
+                                <div class="text-gray-400 py-0.5 sm:py-1">Materiál</div><div id="summ-mat" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Střih</div><div id="summ-cut" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Límec</div><div id="summ-col" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Rukáv</div><div id="summ-slv" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Manžeta</div><div id="summ-cuff" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Knoflíčky</div><div id="summ-btn" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Barva</div><div id="summ-clr" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                                <div class="text-gray-400 py-0.5 sm:py-1">Velikost</div><div id="summ-size" class="font-medium text-black text-right py-0.5 sm:py-1">-</div>
+                            </div>
+                            <div class="border-t border-gray-100 pt-3 sm:pt-5 space-y-2 sm:space-y-4">
+                                <input id="field-name" type="text" placeholder="Jméno a Příjmení *" required class="w-full border-b border-gray-200 py-1.5 sm:py-2.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                                <input id="field-email" type="email" placeholder="Email *" required class="w-full border-b border-gray-200 py-1.5 sm:py-2.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                                <input type="tel" placeholder="Telefon" class="w-full border-b border-gray-200 py-1.5 sm:py-2.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                                <textarea placeholder="Poznámka" rows="1" class="w-full border-b border-gray-200 py-1.5 sm:py-2.5 text-sm focus:outline-none focus:border-black bg-transparent" style="field-sizing: content;"></textarea>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer (Row 3) - Outside Grid Main Content -->
+    <div class="w-full max-w-3xl mx-auto shrink-0 z-10 bg-white pt-2">        
+         <!-- Buttons -->
+        <div class="border-t border-gray-100 flex justify-between items-center p-4 pb-6">
+             <button type="button" id="btn-prev" onclick="prevStepGlobal()" class="text-gray-400 hover:text-black text-xs uppercase tracking-wider p-2 px-4 rounded hover:bg-gray-50 disabled:opacity-30">Zpět</button>
+             <button type="button" id="btn-next" onclick="nextStepGlobal()" class="bg-black text-white px-8 py-3 text-xs tracking-[0.2em] uppercase hover:bg-gray-800 transition rounded-sm shadow-md">Další</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = {
+        material: '60/40',
+        cut: 'regular',
+        collar: 'stojacek',
+        sleeve: 'dlouhy',
+        cuff: 'kulata',
+        buttonColor: 'bila',
+        shirtColor: 'bila',
+        size: 'S'
+    };
+    
+    let currentStep = 1;
+    const TOTAL_STEPS = 9;
+
+    function updateNavButtons(step) {
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        
+        // Prev Button
+        if (step === 1) {
+            btnPrev.disabled = true;
+            btnPrev.classList.add('opacity-30');
+        } else {
+            btnPrev.disabled = false;
+            btnPrev.classList.remove('opacity-30');
+        }
+
+        // Next Button Text
+        btnNext.style.display = 'block';
+        if (step === TOTAL_STEPS) {
+            btnNext.innerText = 'OBJEDNAT';
+            btnNext.onclick = submitOrder;
+            validateForm();
+        } else {
+            btnNext.innerText = (step === TOTAL_STEPS - 1) ? 'SHRNUTÍ' : 'DALŠÍ';
+            btnNext.onclick = nextStepGlobal;
+            btnNext.disabled = false;
+            btnNext.classList.remove('opacity-30', 'cursor-not-allowed');
+        }
+    }
+
+    function nextStepGlobal() {
+        if (currentStep < TOTAL_STEPS) {
+            nextStep(currentStep + 1);
+        }
+    }
+
+    function prevStepGlobal() {
+        if (currentStep > 1) {
+            nextStep(currentStep - 1);
+        }
+    }
+
+    function activateTab(btnElement) {
+        const parent = btnElement.parentElement;
+        parent.querySelectorAll('button').forEach(btn => {
+            btn.classList.add('text-gray-400', 'hover:text-black', 'bg-transparent', 'shadow-none', 'border', 'border-transparent');
+            btn.classList.remove('bg-white', 'shadow-sm', 'text-black', 'border-gray-200');
+        });
+        btnElement.classList.remove('text-gray-400', 'hover:text-black', 'bg-transparent', 'shadow-none', 'border-transparent');
+        btnElement.classList.add('bg-white', 'shadow-sm', 'text-black', 'border', 'border-gray-200');
+    }
+
+    function selectMaterial(materialType, btnElement) {
+        activateTab(btnElement);
+        state.material = materialType;
+        updateSidebar();
+    }
+
+    function selectTabOption(category, value, btnElement) {
+        activateTab(btnElement);
+        state[category] = value;
+        updateSidebar();
+    }
+
+    function selectCard(btnElement) {
+        const container = btnElement.parentElement;
+        container.querySelectorAll('.card-option').forEach(btn => {
+            btn.classList.remove('border-black', 'bg-gray-50', 'text-black', 'border-gray-200', 'border-transparent');
+            btn.classList.add('border-transparent', 'bg-white', 'text-gray-400');
+        });
+        btnElement.classList.remove('border-transparent', 'border-gray-200', 'bg-white', 'text-gray-400');
+        btnElement.classList.add('border-black', 'bg-gray-50', 'text-black');
+    }
+
+    function selectSizeCard(btnElement) {
+        document.querySelectorAll('#size-mode-letter .card-option, #size-mode-neck .card-option').forEach(btn => {
+            btn.classList.remove('border-black', 'bg-gray-50', 'text-black');
+            btn.classList.add('border-transparent', 'bg-white', 'text-gray-400');
+        });
+        btnElement.classList.remove('border-transparent', 'bg-white', 'text-gray-400');
+        btnElement.classList.add('border-black', 'bg-gray-50', 'text-black');
+    }
+
+    function switchSizeMode(mode) {
+        const letterTab = document.getElementById('size-tab-letter');
+        const neckTab = document.getElementById('size-tab-neck');
+        const letterContent = document.getElementById('size-mode-letter');
+        const neckContent = document.getElementById('size-mode-neck');
+
+        if (mode === 'letter') {
+            letterTab.classList.add('text-black', 'border-black');
+            letterTab.classList.remove('text-gray-400', 'border-transparent');
+            neckTab.classList.add('text-gray-400', 'border-transparent');
+            neckTab.classList.remove('text-black', 'border-black');
+            letterContent.classList.remove('hidden');
+            neckContent.classList.add('hidden');
+        } else {
+            neckTab.classList.add('text-black', 'border-black');
+            neckTab.classList.remove('text-gray-400', 'border-transparent');
+            letterTab.classList.add('text-gray-400', 'border-transparent');
+            letterTab.classList.remove('text-black', 'border-black');
+            neckContent.classList.remove('hidden');
+            letterContent.classList.add('hidden');
+        }
+
+        // Sync selection to target mode
+        const sizeMap = {'S':'37/38','M':'39/40','L':'41/42','XL':'43/44','XXL':'45/46','3XL':'47/48','4XL':'49/50','5XL':'51/52'};
+        const reverseMap = {};
+        for (const [k,v] of Object.entries(sizeMap)) reverseMap[v] = k;
+
+        let targetSize = state.size;
+        if (mode === 'letter' && reverseMap[state.size]) targetSize = reverseMap[state.size];
+        else if (mode === 'neck' && sizeMap[state.size]) targetSize = sizeMap[state.size];
+
+        const targetContainer = mode === 'letter' ? letterContent : neckContent;
+        const match = targetContainer.querySelector('[data-size="' + targetSize + '"]');
+        if (match) {
+            targetContainer.querySelectorAll('.card-option').forEach(btn => {
+                btn.classList.remove('border-black', 'bg-gray-50', 'text-black');
+                btn.classList.add('border-transparent', 'bg-white', 'text-gray-400');
+            });
+            match.classList.remove('border-transparent', 'bg-white', 'text-gray-400');
+            match.classList.add('border-black', 'bg-gray-50', 'text-black');
+            state.size = targetSize;
+            updateSidebar();
+        }
+    }
+
+    function updateCutView(cutType, btnElement) {
+        activateTab(btnElement);
+
+        // Update Image
+        const imgEl = document.getElementById('cut-preview-img');
+        const descEl = document.getElementById('cut-desc');
+        
+        // Map cut types to images
+        let imgSrc = '';
+        let descText = '';
+        if(cutType === 'regular') {
+            imgSrc = './images/cuts/regular.png';
+            descText = 'Klasický rovný střih pro maximální pohodlí a volnost pohybu.';
+        } else if(cutType === 'slim') {
+            imgSrc = './images/cuts/slim.png';
+            descText = 'Mírně vypasovaný střih, který zvýrazní postavu, ale neomezuje.';
+        } else if(cutType === 'slim-fit') {
+            imgSrc = './images/cuts/extra-slim.png';
+            descText = 'Štíhlý, tělo obepínající střih pro moderní a ostrý vzhled.';
+        }
+        
+        // Simple fade effect
+        imgEl.style.opacity = '0';
+        setTimeout(() => {
+            imgEl.src = imgSrc;
+            imgEl.style.opacity = '1';
+            descEl.innerText = descText;
+        }, 150);
+    }
+
+    function updateCollarView(collarType, btnElement) {
+        activateTab(btnElement);
+
+        // Update Image
+        const imgEl = document.getElementById('collar-preview-img');
+        const descEl = document.getElementById('collar-desc');
+        
+        let imgSrc = '';
+        let descText = '';
+        if(collarType === 'stojacek') {
+            imgSrc = './images/collars/stand.png';
+            descText = 'Moderní úzký límec bez patek, ideální pro neformální vzhled.';
+        } else if(collarType === 'propnuty') {
+            imgSrc = './images/collars/button-down.png';
+            descText = 'Límec s propínacími knoflíčky, drží tvar, sportovně-elegantní.';
+        } else if(collarType === 'kent') {
+            imgSrc = './images/collars/kent.png';
+            descText = 'Klasický límec, univerzální volba pro každou příležitost.';
+        }
+        
+        imgEl.style.opacity = '0';
+        setTimeout(() => {
+            imgEl.src = imgSrc;
+            imgEl.style.opacity = '1';
+            descEl.innerText = descText;
+        }, 150);
+    }
+
+    function updateSleeveView(sleeveType, btnElement) {
+        activateTab(btnElement);
+
+        // Update Image
+        const imgEl = document.getElementById('sleeve-preview-img');
+        const descEl = document.getElementById('sleeve-desc');
+        
+        let imgSrc = '';
+        let descText = '';
+        if(sleeveType === 'dlouhy') {
+            imgSrc = './images/sleeves/long.png';
+            descText = 'Standardní délka rukávu k zápěstí.';
+        } else if(sleeveType === 'kratky') {
+            imgSrc = './images/sleeves/short.png';
+            descText = 'Krátký rukáv, ideální pro letní dny.';
+        } else if(sleeveType === 'ohrnovaci') {
+            imgSrc = './images/sleeves/roll-up.png';
+            descText = 'Dlouhý rukáv s možností zajištění v ohrnutém stavu.';
+        }
+        
+        imgEl.style.opacity = '0';
+        setTimeout(() => {
+            imgEl.src = imgSrc;
+            imgEl.style.opacity = '1';
+            descEl.innerText = descText;
+        }, 150);
+    }
+
+    function updateCuffView(cuffType, btnElement) {
+        activateTab(btnElement);
+
+        // Update Image
+        const imgEl = document.getElementById('cuff-preview-img');
+        const descEl = document.getElementById('cuff-desc');
+        
+        let imgSrc = '';
+        let descText = '';
+        if(cuffType === 'kulata') {
+            imgSrc = './images/cuffs/rounded.png';
+            descText = 'Klasická kulatá manžeta s jedním knoflíčkem, nadčasová volba.';
+        } else if(cuffType === 'hranata') {
+            imgSrc = './images/cuffs/mitered.png';
+            descText = 'Zkosená manžeta, elegantní a formálnější varianta.';
+        } else if(cuffType === 'ohrnovaci') {
+            imgSrc = './images/cuffs/french.png';
+            descText = 'Francouzská manžeta na manžetové knoflíčky pro slavnostní příležitosti.';
+        }
+        
+        imgEl.style.opacity = '0';
+        setTimeout(() => {
+            imgEl.src = imgSrc;
+            imgEl.style.opacity = '1';
+            descEl.innerText = descText;
+        }, 150);
+    }
+
+    const stepNames = [
+        "Materiál",
+        "Střih",
+        "Límec",
+        "Rukáv",
+        "Manžeta",
+        "Knoflíky",
+        "Barva",
+        "Velikost",
+        "Shrnutí a odeslání"
+    ];
+
+    function nextStep(stepNum) {
+        currentStep = stepNum;
+        document.querySelectorAll('.step-content').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        });
+        const activeEl = document.getElementById('step-' + stepNum);
+        if(activeEl) {
+            activeEl.classList.remove('hidden');
+            activeEl.classList.add('flex');
+        }
+        
+        // Update Header Title
+        const titleEl = document.getElementById('header-section-title');
+        if (titleEl) {
+            titleEl.innerText = stepNames[stepNum - 1] || 'Konfigurace';
+        }
+
+        // Update Progress Bar
+        updateProgressBar(stepNum);
+
+        // Update Global Buttons
+        updateNavButtons(stepNum);
+    }
+
+    const stepperLabels = ["Materiál","Střih","Límec","Rukáv","Manžeta","Knoflíky","Barva","Velikost","Shrnutí"];
+    const checkSvg = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+    const penSvg = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+
+    function renderStepper() {
+        const container = document.getElementById('stepper');
+        let html = '';
+        for (let i = 0; i < TOTAL_STEPS; i++) {
+            html += '<div class="flex flex-col items-center cursor-pointer" onclick="jumpToStep(' + (i+1) + ')">';
+            html += '<div id="stepper-circle-' + (i+1) + '" class="stepper-circle border-2 border-gray-300 bg-white text-gray-400">' + (i+1) + '</div>';
+            html += '<div id="stepper-label-' + (i+1) + '" class="stepper-label text-gray-400 hidden sm:block">' + stepperLabels[i] + '</div>';
+            html += '</div>';
+            if (i < TOTAL_STEPS - 1) {
+                html += '<div id="stepper-line-' + (i+1) + '" class="stepper-line bg-gray-200"></div>';
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    function updateProgressBar(stepNum) {
+        for (let i = 1; i <= TOTAL_STEPS; i++) {
+            const circle = document.getElementById('stepper-circle-' + i);
+            const label = document.getElementById('stepper-label-' + i);
+            const line = document.getElementById('stepper-line-' + i);
+            if (!circle) continue;
+
+            if (i < stepNum) {
+                circle.className = 'stepper-circle bg-gray-600 text-white border-2 border-gray-600';
+                circle.innerHTML = checkSvg;
+                if (label) label.className = 'stepper-label text-gray-600 hidden sm:block';
+            } else if (i === stepNum) {
+                circle.className = 'stepper-circle bg-white text-gray-700 border-2 border-gray-700';
+                circle.innerHTML = penSvg;
+                if (label) label.className = 'stepper-label text-gray-700 font-semibold hidden sm:block';
+            } else {
+                circle.className = 'stepper-circle bg-white text-gray-400 border-2 border-gray-300';
+                circle.innerHTML = i;
+                if (label) label.className = 'stepper-label text-gray-400 hidden sm:block';
+            }
+
+            if (line) {
+                line.className = i < stepNum ? 'stepper-line bg-gray-600' : 'stepper-line bg-gray-200';
+            }
+        }
+    }
+
+    function jumpToStep(targetStep) {
+        // Allow jumping backward freely.
+        // Forward jumping is allowed for now based on user request "return to that card" implies free nav
+        // But logical flow usually implies you can only jump to visited.
+        // For prototype freedom, I'll allow jumping anywhere.
+        nextStep(targetStep);
+    }
+
+    function selectOption(category, value, element) {
+        state[category] = value;
+        
+        // Remove selected class from siblings (if grid/card layout used)
+        let container = element.parentElement;
+        // Check if we are in a grid container or the flex container for headers
+        if (container.classList.contains('grid') || container.classList.contains('flex')) {
+             // Basic handling for grid items
+             container.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+        }
+        // Also check if we are in the special tab-based step 2, element passed might be the button
+        if(category !== 'cut') {
+            element.classList.add('selected');
+        }
+
+        // Update Summary Sidebar (Removed, but keeping generic update if needed)
+        updateSidebar();
+        
+        // Auto-advance logic REMOVED for this version as we have global Next button
+        // User requested explicit navigation ("button at bottom")
+    }
+
+    function updatePreviewImage(src) {
+        // Preview removed
+    }
+
+    const displayNames = {
+        material: { '60/40': '60% Bavlna / 40% Polyester', '100% Bavlna': '100% Bavlna Easy Care' },
+        cut: { 'regular': 'Regular', 'slim': 'Slim', 'slim-fit': 'Slim Fit' },
+        collar: { 'stojacek': 'Stojáček', 'propnuty': 'Propnutý', 'kent': 'Kent' },
+        sleeve: { 'dlouhy': 'Dlouhý', 'kratky': 'Krátký', 'ohrnovaci': 'Ohrnovací' },
+        cuff: { 'kulata': 'Kulatá', 'hranata': 'Hranatá', 'ohrnovaci': 'Ohrnovací' },
+        buttonColor: { 'bila': 'Bílá', 'cerna': 'Černá', 'modra': 'Modrá', 'seda': 'Šedá' },
+        shirtColor: { 'bila': 'Bílá', 'cerna': 'Černá', 'kralovska-modra': 'Královská modrá', 'svetle-seda': 'Světle šedá', 'svetle-modra': 'Světle modrá' }
+    };
+
+    function getDisplay(category, value) {
+        return (displayNames[category] && displayNames[category][value]) || value;
+    }
+
+    function updateSidebar() {
+        if(document.getElementById('summ-mat')) {
+             if(state.material) document.getElementById('summ-mat').innerText = getDisplay('material', state.material);
+             if(state.cut) document.getElementById('summ-cut').innerText = getDisplay('cut', state.cut);
+             if(state.collar) document.getElementById('summ-col').innerText = getDisplay('collar', state.collar);
+             if(state.cuff) document.getElementById('summ-cuff').innerText = getDisplay('cuff', state.cuff);
+             if(state.sleeve) document.getElementById('summ-slv').innerText = getDisplay('sleeve', state.sleeve);
+             if(state.buttonColor) document.getElementById('summ-btn').innerText = getDisplay('buttonColor', state.buttonColor);
+             if(state.shirtColor) document.getElementById('summ-clr').innerText = getDisplay('shirtColor', state.shirtColor);
+             if(state.size) document.getElementById('summ-size').innerText = state.size;
+        }
+    }
+
+    function validateForm() {
+        const name = document.getElementById('field-name');
+        const email = document.getElementById('field-email');
+        const btn = document.getElementById('btn-next');
+        if (!name || !email || !btn || currentStep !== TOTAL_STEPS) return;
+        const valid = name.value.trim().length > 0 && email.value.trim().length > 0 && email.value.includes('@');
+        btn.disabled = !valid;
+        if (valid) {
+            btn.classList.remove('opacity-30', 'cursor-not-allowed');
+        } else {
+            btn.classList.add('opacity-30', 'cursor-not-allowed');
+        }
+    }
+
+    function submitOrder() {
+        const name = document.getElementById('field-name');
+        const email = document.getElementById('field-email');
+        if (!name.value.trim() || !email.value.trim() || !email.value.includes('@')) return;
+        alert('Objednávka odeslána! Děkujeme.');
+    }
+    
+    // Mobile Viewport Height Fix
+    function setAppHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', setAppHeight);
+    setAppHeight();
+
+    // Init
+    renderStepper();
+    updateProgressBar(1);
+    updateNavButtons(1);
+    updateSidebar();
+
+    // Form validation listeners
+    document.getElementById('field-name').addEventListener('input', validateForm);
+    document.getElementById('field-email').addEventListener('input', validateForm);
+</script>
+</body>
+</html>

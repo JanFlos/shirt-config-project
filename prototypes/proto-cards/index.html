@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurátor Košil — Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        /* === MOBILE: Carousel === */
+        .cards-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 0;
+            padding: 0;
+        }
+        .cards-track::-webkit-scrollbar { display: none; }
+        .card {
+            flex: 0 0 calc(100vw - 32px);
+            scroll-snap-align: center;
+            min-height: 0;
+            margin: 0 16px;
+        }
+        @media (min-width: 640px) {
+            .card { flex: 0 0 70vw; margin: 0 12px; }
+        }
+
+        /* === DESKTOP: Wizard panel === */
+        @media (min-width: 1024px) {
+            .cards-track {
+                overflow: visible;
+                scroll-snap-type: none;
+                padding: 0;
+                display: block;
+                height: 100%;
+            }
+            .card {
+                display: none !important;
+                flex: none;
+                width: 100%;
+                max-width: 560px;
+                margin: 0 auto;
+                height: 100%;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                background: transparent;
+            }
+            .card.active-panel {
+                display: flex !important;
+            }
+        }
+
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dot.active {
+            width: 24px;
+            border-radius: 4px;
+        }
+        .arrow-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .cards-wrapper:hover .arrow-btn {
+            opacity: 1;
+        }
+
+        /* === STEPPER (desktop) === */
+        .stepper-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .stepper-line {
+            height: 2px;
+            flex: 1;
+            margin-top: 14px;
+            transition: background-color 0.3s ease;
+            min-width: 12px;
+        }
+        .stepper-label {
+            font-size: 0.55rem;
+            margin-top: 4px;
+            text-align: center;
+            white-space: nowrap;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 lg:bg-white text-gray-900 antialiased">
+
+<div class="h-[100dvh] flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="shrink-0 px-6 lg:px-8 lg:pt-6 lg:pb-0 pt-5 pb-3">
+        <div class="text-center lg:text-left lg:max-w-2xl lg:mx-auto">
+            <span class="text-[0.6rem] text-gray-400 font-medium uppercase tracking-[0.25em]">LUKO KOŠILE NA MÍRU</span>
+            <h1 id="card-title" class="text-lg font-semibold text-black mt-1">Materiál</h1>
+        </div>
+
+        <!-- Stepper (desktop only) -->
+        <div id="stepper" class="hidden lg:flex items-start max-w-2xl mx-auto mt-4 mb-2"></div>
+    </header>
+
+    <!-- === MOBILE: Carousel content area === -->
+    <div id="mobile-area" class="lg:hidden flex-grow min-h-0 relative cards-wrapper flex items-center">
+        <!-- Left Arrow -->
+        <button onclick="scrollToPrev()" class="arrow-btn absolute left-2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-500 hover:text-black hover:shadow-lg transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+
+        <!-- Cards Track -->
+        <div id="cards-track" class="cards-track w-full h-full py-4 items-stretch">
+
+            <!-- Card 1: Materiál -->
+            <div class="card active-panel bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="0">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 1 / 9</div>
+                <div class="text-base font-semibold mb-5 lg:hidden">Materiál</div>
+                <div class="flex flex-col gap-3 flex-grow justify-center max-w-lg mx-auto w-full">
+                    <button type="button" class="card-option w-full py-5 px-4 text-xs uppercase font-bold tracking-wider rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'material','60/40')">
+                        60% Bavlna / 40% Polyester
+                    </button>
+                    <button type="button" class="card-option w-full py-5 px-4 text-xs uppercase font-bold tracking-wider rounded-xl border-2 border-transparent bg-white text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'material','100% Bavlna')">
+                        100% Bavlna Easy Care
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Střih -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="1">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 2 / 9</div>
+                <div class="text-base font-semibold mb-3 lg:hidden">Střih</div>
+                <div class="flex gap-2 mb-3 shrink-0 max-w-lg mx-auto w-full">
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'cut','regular'); showImg('cut-img','./images/cuts/regular.png','cut-d','Klasický rovný střih.')">Regular</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'cut','slim'); showImg('cut-img','./images/cuts/slim.png','cut-d','Mírně vypasovaný střih.')">Slim</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'cut','slim-fit'); showImg('cut-img','./images/cuts/extra-slim.png','cut-d','Štíhlý, obepínající střih.')">Slim Fit</button>
+                </div>
+                <div class="flex-grow flex items-center justify-center min-h-0 overflow-hidden">
+                    <img id="cut-img" src="./images/cuts/regular.png" class="max-h-full max-w-full object-contain transition-opacity duration-300">
+                </div>
+                <p id="cut-d" class="text-[0.65rem] text-gray-400 text-center mt-2 shrink-0">Klasický rovný střih.</p>
+            </div>
+
+            <!-- Card 3: Límec -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="2">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 3 / 9</div>
+                <div class="text-base font-semibold mb-3 lg:hidden">Límec</div>
+                <div class="flex gap-2 mb-3 shrink-0 max-w-lg mx-auto w-full">
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'collar','stojacek'); showImg('collar-img','./images/collars/stand.png','collar-d','Moderní úzký límec bez patek.')">Stojáček</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'collar','propnuty'); showImg('collar-img','./images/collars/button-down.png','collar-d','Límec s propínacími knoflíčky.')">Propnutý</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'collar','kent'); showImg('collar-img','./images/collars/kent.png','collar-d','Klasický univerzální límec.')">Kent</button>
+                </div>
+                <div class="flex-grow flex items-center justify-center min-h-0 overflow-hidden">
+                    <img id="collar-img" src="./images/collars/stand.png" class="max-h-full max-w-full object-contain transition-opacity duration-300">
+                </div>
+                <p id="collar-d" class="text-[0.65rem] text-gray-400 text-center mt-2 shrink-0">Moderní úzký límec bez patek.</p>
+            </div>
+
+            <!-- Card 4: Rukáv -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="3">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 4 / 9</div>
+                <div class="text-base font-semibold mb-3 lg:hidden">Rukáv</div>
+                <div class="flex gap-2 mb-3 shrink-0 max-w-lg mx-auto w-full">
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'sleeve','dlouhy'); showImg('sleeve-img','./images/sleeves/long.png','sleeve-d','Standardní délka k zápěstí.')">Dlouhý</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'sleeve','kratky'); showImg('sleeve-img','./images/sleeves/short.png','sleeve-d','Krátký rukáv pro léto.')">Krátký</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'sleeve','ohrnovaci'); showImg('sleeve-img','./images/sleeves/roll-up.png','sleeve-d','Dlouhý s možností ohrnout.')">Ohrnovací</button>
+                </div>
+                <div class="flex-grow flex items-center justify-center min-h-0 overflow-hidden">
+                    <img id="sleeve-img" src="./images/sleeves/long.png" class="max-h-full max-w-full object-contain transition-opacity duration-300">
+                </div>
+                <p id="sleeve-d" class="text-[0.65rem] text-gray-400 text-center mt-2 shrink-0">Standardní délka k zápěstí.</p>
+            </div>
+
+            <!-- Card 5: Manžeta -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="4">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 5 / 9</div>
+                <div class="text-base font-semibold mb-3 lg:hidden">Manžeta</div>
+                <div class="flex gap-2 mb-3 shrink-0 max-w-lg mx-auto w-full">
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'cuff','kulata'); showImg('cuff-img','./images/cuffs/rounded.png','cuff-d','Klasická kulatá manžeta.')">Kulatá</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'cuff','hranata'); showImg('cuff-img','./images/cuffs/mitered.png','cuff-d','Zkosená elegantní manžeta.')">Hranatá</button>
+                    <button class="card-option flex-1 py-3 px-2 text-[0.65rem] uppercase font-bold tracking-wider rounded-xl border-2 border-transparent text-gray-400 hover:border-gray-300 hover:text-black transition-all" onclick="pick(this,'cuff','ohrnovaci'); showImg('cuff-img','./images/cuffs/french.png','cuff-d','Francouzská manžeta na manžetové knoflíčky.')">Francouzská</button>
+                </div>
+                <div class="flex-grow flex items-center justify-center min-h-0 overflow-hidden">
+                    <img id="cuff-img" src="./images/cuffs/rounded.png" class="max-h-full max-w-full object-contain transition-opacity duration-300">
+                </div>
+                <p id="cuff-d" class="text-[0.65rem] text-gray-400 text-center mt-2 shrink-0">Klasická kulatá manžeta.</p>
+            </div>
+
+            <!-- Card 6: Knoflíky -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="5">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 6 / 9</div>
+                <div class="text-base font-semibold mb-5 lg:hidden">Barva knoflíků</div>
+                <div class="grid grid-cols-4 gap-3 flex-grow content-center max-w-md mx-auto">
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'buttonColor','bila')">
+                        <div class="w-10 h-10 rounded-full border border-gray-300 bg-white mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Bílá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'buttonColor','cerna')">
+                        <div class="w-10 h-10 rounded-full border border-gray-300 bg-black mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Černá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'buttonColor','modra')">
+                        <div class="w-10 h-10 rounded-full border border-gray-300 bg-blue-600 mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Modrá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'buttonColor','seda')">
+                        <div class="w-10 h-10 rounded-full border border-gray-300 bg-gray-400 mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Šedá</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 7: Barva košile -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="6">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 7 / 9</div>
+                <div class="text-base font-semibold mb-5 lg:hidden">Barva košile</div>
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 flex-grow content-center max-w-md mx-auto">
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-black bg-gray-50 text-black transition-all" onclick="pick(this,'shirtColor','bila')">
+                        <div class="w-10 h-10 rounded-full border border-gray-200 bg-white mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Bílá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'shirtColor','cerna')">
+                        <div class="w-10 h-10 rounded-full border border-gray-200 bg-black mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider">Černá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'shirtColor','kralovska-modra')">
+                        <div class="w-10 h-10 rounded-full border border-gray-200 bg-blue-900 mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Král. modrá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'shirtColor','svetle-seda')">
+                        <div class="w-10 h-10 rounded-full border border-gray-200 bg-gray-300 mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Sv. šedá</span>
+                    </button>
+                    <button class="card-option flex flex-col items-center py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black transition-all" onclick="pick(this,'shirtColor','svetle-modra')">
+                        <div class="w-10 h-10 rounded-full border border-gray-200 bg-blue-300 mb-2"></div>
+                        <span class="text-[0.6rem] uppercase font-bold tracking-wider leading-tight text-center">Sv. modrá</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 8: Velikost -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="7">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 8 / 9</div>
+                <div class="text-base font-semibold mb-5 lg:hidden">Velikost</div>
+                <div class="grid grid-cols-4 gap-3 flex-grow content-center max-w-md mx-auto">
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-black bg-gray-50 text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','S')">
+                        <span class="text-sm font-bold">S</span><span class="text-[0.55rem] text-gray-400 mt-0.5">37/38</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','M')">
+                        <span class="text-sm font-bold">M</span><span class="text-[0.55rem] mt-0.5">39/40</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','L')">
+                        <span class="text-sm font-bold">L</span><span class="text-[0.55rem] mt-0.5">41/42</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','XL')">
+                        <span class="text-sm font-bold">XL</span><span class="text-[0.55rem] mt-0.5">43/44</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','XXL')">
+                        <span class="text-sm font-bold">XXL</span><span class="text-[0.55rem] mt-0.5">45/46</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','3XL')">
+                        <span class="text-sm font-bold">3XL</span><span class="text-[0.55rem] mt-0.5">47/48</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','4XL')">
+                        <span class="text-sm font-bold">4XL</span><span class="text-[0.55rem] mt-0.5">49/50</span>
+                    </button>
+                    <button class="card-option py-4 px-2 rounded-xl border-2 border-transparent text-gray-400 hover:text-black flex flex-col items-center justify-center transition-all" onclick="pick(this,'size','5XL')">
+                        <span class="text-sm font-bold">5XL</span><span class="text-[0.55rem] mt-0.5">51/52</span>
+                    </button>
+                </div>
+                <p class="text-[0.55rem] text-gray-300 mt-3 text-center shrink-0">Čísla udávají obvod krku v cm</p>
+            </div>
+
+            <!-- Card 9: Shrnutí -->
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="8">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 9 / 9</div>
+                <div class="text-base font-semibold mb-4 lg:hidden">Shrnutí a odeslání</div>
+                <div class="flex-grow overflow-y-auto max-w-lg mx-auto w-full">
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[0.7rem] mb-4">
+                        <div class="text-gray-400 py-0.5">Materiál</div><div id="s-mat" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Střih</div><div id="s-cut" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Límec</div><div id="s-col" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Rukáv</div><div id="s-slv" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Manžeta</div><div id="s-cuf" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Knoflíčky</div><div id="s-btn" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Barva</div><div id="s-clr" class="font-medium text-black text-right py-0.5">-</div>
+                        <div class="text-gray-400 py-0.5">Velikost</div><div id="s-siz" class="font-medium text-black text-right py-0.5">-</div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-3 space-y-2">
+                        <input id="f-name" type="text" placeholder="Jméno a Příjmení *" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <input id="f-email" type="email" placeholder="Email *" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <input type="tel" placeholder="Telefon" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <textarea placeholder="Poznámka" rows="1" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent resize-none"></textarea>
+                    </div>
+                    <button type="button" onclick="submitOrder()" class="w-full mt-4 bg-black text-white py-3.5 text-xs tracking-[0.2em] uppercase hover:bg-gray-800 transition rounded-lg font-semibold">Objednat</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Arrow -->
+        <button onclick="scrollToNext()" class="arrow-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-500 hover:text-black hover:shadow-lg transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+
+    <!-- === DESKTOP: Wizard content area === -->
+    <div id="desktop-area" class="hidden lg:flex flex-grow min-h-0 flex-col">
+        <div id="desktop-content" class="flex-grow min-h-0 overflow-y-auto">
+            <!-- Cards are repositioned here via JS on desktop -->
+        </div>
+    </div>
+
+    <!-- MOBILE: Dots -->
+    <div id="dots-nav" class="lg:hidden shrink-0 flex justify-center gap-2 py-4">
+        <div class="dot bg-black active" onclick="scrollToCard(0)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(1)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(2)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(3)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(4)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(5)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(6)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(7)"></div>
+        <div class="dot bg-gray-300" onclick="scrollToCard(8)"></div>
+    </div>
+
+    <!-- DESKTOP: Bottom nav buttons -->
+    <div id="desktop-nav" class="hidden lg:flex shrink-0 justify-between items-center max-w-2xl mx-auto w-full px-8 py-5">
+        <button id="btn-prev" onclick="scrollToPrev()" class="text-sm text-gray-400 hover:text-black transition-colors flex items-center gap-2 disabled:opacity-30 disabled:cursor-default" disabled>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Zpět
+        </button>
+        <span id="step-counter" class="text-[0.65rem] text-gray-300 uppercase tracking-wider font-medium">1 / 9</span>
+        <button id="btn-next" onclick="scrollToNext()" class="text-sm text-black hover:text-gray-600 transition-colors flex items-center gap-2 font-medium">
+            Další
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    const track = document.getElementById('cards-track');
+    const desktopContent = document.getElementById('desktop-content');
+    const cards = document.querySelectorAll('.card');
+    const dots = document.querySelectorAll('.dot');
+    const titleEl = document.getElementById('card-title');
+    const stepNames = ["Materiál","Střih","Límec","Rukáv","Manžeta","Knoflíky","Barva","Velikost","Shrnutí"];
+    const TOTAL = 9;
+    let currentIdx = 0;
+    const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
+    const state = {
+        material: '60/40', cut: 'regular', collar: 'stojacek',
+        sleeve: 'dlouhy', cuff: 'kulata', buttonColor: 'bila',
+        shirtColor: 'bila', size: 'S'
+    };
+
+    const displayNames = {
+        material: { '60/40': '60/40 Bavlna/Poly', '100% Bavlna': '100% Bavlna' },
+        cut: { 'regular': 'Regular', 'slim': 'Slim', 'slim-fit': 'Slim Fit' },
+        collar: { 'stojacek': 'Stojáček', 'propnuty': 'Propnutý', 'kent': 'Kent' },
+        sleeve: { 'dlouhy': 'Dlouhý', 'kratky': 'Krátký', 'ohrnovaci': 'Ohrnovací' },
+        cuff: { 'kulata': 'Kulatá', 'hranata': 'Hranatá', 'ohrnovaci': 'Francouzská' },
+        buttonColor: { 'bila': 'Bílá', 'cerna': 'Černá', 'modra': 'Modrá', 'seda': 'Šedá' },
+        shirtColor: { 'bila': 'Bílá', 'cerna': 'Černá', 'kralovska-modra': 'Král. modrá', 'svetle-seda': 'Sv. šedá', 'svetle-modra': 'Sv. modrá' }
+    };
+
+    function pick(btn, key, val) {
+        state[key] = val;
+        const container = btn.parentElement;
+        container.querySelectorAll('.card-option').forEach(b => {
+            b.classList.remove('border-black', 'bg-gray-50', 'text-black');
+            b.classList.add('border-transparent', 'text-gray-400');
+        });
+        btn.classList.remove('border-transparent', 'text-gray-400');
+        btn.classList.add('border-black', 'bg-gray-50', 'text-black');
+        updateSummary();
+    }
+
+    function showImg(imgId, src, descId, desc) {
+        const img = document.getElementById(imgId);
+        img.style.opacity = '0';
+        setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 150);
+        if (descId) document.getElementById(descId).textContent = desc;
+    }
+
+    function updateSummary() {
+        const g = (cat, val) => (displayNames[cat] && displayNames[cat][val]) || val;
+        document.getElementById('s-mat').textContent = g('material', state.material);
+        document.getElementById('s-cut').textContent = g('cut', state.cut);
+        document.getElementById('s-col').textContent = g('collar', state.collar);
+        document.getElementById('s-slv').textContent = g('sleeve', state.sleeve);
+        document.getElementById('s-cuf').textContent = g('cuff', state.cuff);
+        document.getElementById('s-btn').textContent = g('buttonColor', state.buttonColor);
+        document.getElementById('s-clr').textContent = g('shirtColor', state.shirtColor);
+        document.getElementById('s-siz').textContent = state.size;
+    }
+
+    // --- Navigation ---
+    function goToStep(idx) {
+        currentIdx = idx;
+        titleEl.textContent = stepNames[idx];
+
+        // Mobile: dots + scroll
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i === idx);
+            d.classList.toggle('bg-black', i === idx);
+            d.classList.toggle('bg-gray-300', i !== idx);
+        });
+
+        if (isDesktop()) {
+            // Desktop: toggle panels + update stepper
+            cards.forEach(c => c.classList.remove('active-panel'));
+            cards[idx].classList.add('active-panel');
+            updateStepper(idx);
+            updateDesktopNav(idx);
+        } else {
+            cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }
+
+    function scrollToCard(idx) { goToStep(idx); }
+    function scrollToNext() { if (currentIdx < TOTAL - 1) goToStep(currentIdx + 1); }
+    function scrollToPrev() { if (currentIdx > 0) goToStep(currentIdx - 1); }
+
+    // Mobile: detect current card via IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+        if (isDesktop()) return;
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                const idx = parseInt(entry.target.dataset.step);
+                if (idx !== currentIdx) {
+                    currentIdx = idx;
+                    dots.forEach((d, i) => {
+                        d.classList.toggle('active', i === idx);
+                        d.classList.toggle('bg-black', i === idx);
+                        d.classList.toggle('bg-gray-300', i !== idx);
+                    });
+                    titleEl.textContent = stepNames[idx];
+                }
+            }
+        });
+    }, { root: track, threshold: 0.5 });
+    cards.forEach(c => observer.observe(c));
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') scrollToNext();
+        if (e.key === 'ArrowLeft') scrollToPrev();
+    });
+
+    // === STEPPER (desktop) ===
+    const checkSvg = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+    const penSvg = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+
+    function renderStepper() {
+        const container = document.getElementById('stepper');
+        let html = '';
+        for (let i = 0; i < TOTAL; i++) {
+            html += '<div class="flex flex-col items-center cursor-pointer" onclick="goToStep(' + i + ')">';
+            html += '<div id="sc-' + i + '" class="stepper-circle border-2 border-gray-300 bg-white text-gray-400">' + (i + 1) + '</div>';
+            html += '<div id="sl-' + i + '" class="stepper-label text-gray-400">' + stepNames[i] + '</div>';
+            html += '</div>';
+            if (i < TOTAL - 1) {
+                html += '<div id="sln-' + i + '" class="stepper-line bg-gray-200"></div>';
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    function updateStepper(idx) {
+        for (let i = 0; i < TOTAL; i++) {
+            const circle = document.getElementById('sc-' + i);
+            const label = document.getElementById('sl-' + i);
+            const line = document.getElementById('sln-' + i);
+            if (!circle) continue;
+
+            if (i < idx) {
+                circle.className = 'stepper-circle bg-gray-600 text-white border-2 border-gray-600';
+                circle.innerHTML = checkSvg;
+                if (label) label.className = 'stepper-label text-gray-600';
+            } else if (i === idx) {
+                circle.className = 'stepper-circle bg-white text-gray-700 border-2 border-gray-700';
+                circle.innerHTML = penSvg;
+                if (label) label.className = 'stepper-label text-gray-700 font-semibold';
+            } else {
+                circle.className = 'stepper-circle bg-white text-gray-400 border-2 border-gray-300';
+                circle.innerHTML = (i + 1);
+                if (label) label.className = 'stepper-label text-gray-400';
+            }
+            if (line) {
+                line.className = i < idx ? 'stepper-line bg-gray-600' : 'stepper-line bg-gray-200';
+            }
+        }
+    }
+
+    function updateDesktopNav(idx) {
+        const prev = document.getElementById('btn-prev');
+        const next = document.getElementById('btn-next');
+        const counter = document.getElementById('step-counter');
+        prev.disabled = idx === 0;
+        next.disabled = idx === TOTAL - 1;
+        next.style.opacity = idx === TOTAL - 1 ? '0.3' : '1';
+        counter.textContent = (idx + 1) + ' / ' + TOTAL;
+    }
+
+    function submitOrder() {
+        const name = document.getElementById('f-name').value.trim();
+        const email = document.getElementById('f-email').value.trim();
+        if (!name || !email || !email.includes('@')) { alert('Vyplňte prosím jméno a email.'); return; }
+        alert('Objednávka odeslána! Děkujeme.');
+    }
+
+    // === Layout handling ===
+    // On desktop, move cards into desktop-content container
+    function setupLayout() {
+        if (isDesktop()) {
+            // Move cards to desktop container if not already there
+            if (cards[0].parentElement !== desktopContent) {
+                cards.forEach(c => desktopContent.appendChild(c));
+            }
+        } else {
+            // Move cards back to mobile track
+            if (cards[0].parentElement !== track) {
+                cards.forEach(c => track.appendChild(c));
+            }
+        }
+        // Re-apply active state
+        cards.forEach(c => c.classList.remove('active-panel'));
+        cards[currentIdx].classList.add('active-panel');
+        if (isDesktop()) {
+            updateStepper(currentIdx);
+            updateDesktopNav(currentIdx);
+        }
+    }
+
+    // Init
+    renderStepper();
+    updateSummary();
+    setupLayout();
+    window.addEventListener('resize', setupLayout);
+</script>
+</body>
+</html>

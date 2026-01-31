@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUKO — Prototypy konfigurátoru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-[100dvh] flex flex-col">
+
+    <div class="flex-grow flex flex-col items-center justify-center px-4 py-6 lg:py-12">
+        <!-- Brand -->
+        <div class="mb-3 lg:mb-8 text-center">
+            <span class="text-[0.6rem] lg:text-xs text-gray-400 font-medium uppercase tracking-[0.25em]">Interní prototypy</span>
+            <h1 class="text-3xl lg:text-5xl font-light text-black mt-1.5 lg:mt-3 tracking-tight">LUKO</h1>
+            <p class="text-xs lg:text-sm text-gray-400 mt-0.5 lg:mt-1">Konfigurátor košil na míru</p>
+        </div>
+
+        <!-- Intro -->
+        <div class="w-full max-w-sm lg:max-w-2xl mb-4 lg:mb-8 text-center space-y-1 lg:space-y-2">
+            <p class="text-[0.7rem] lg:text-base text-gray-500 leading-relaxed">Prohlédněte si různé varianty konfigurátoru košil. Každý prototyp nabízí jiný přístup k&nbsp;navigaci a&nbsp;výběru — a&nbsp;každý se chová odlišně na <strong class="text-gray-600">mobilním telefonu</strong> a&nbsp;na <strong class="text-gray-600">desktopu</strong>.</p>
+            <p class="text-[0.6rem] lg:text-sm text-gray-400 leading-relaxed">Prototypy v1–v4 jsou plně funkční a snadno převeditelné do produkce. Prototyp v5 je rozpracovaný (~30&nbsp;%) a&nbsp;implementačně výrazně náročnější.</p>
+        </div>
+
+        <!-- Prototype List -->
+        <div class="flex flex-col gap-2 lg:gap-3 w-full max-w-sm lg:max-w-2xl">
+
+            <a href="./proto-minimal/" class="group flex items-center gap-3 lg:gap-5 bg-white rounded-xl border border-gray-200 px-4 py-3 lg:px-6 lg:py-5 hover:border-gray-400 hover:shadow-md transition-all duration-200">
+                <span class="text-[0.55rem] lg:text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">v1</span>
+                <div class="flex-grow min-w-0">
+                    <div class="text-sm lg:text-lg font-medium text-black">Minimal</div>
+                    <div class="text-[0.6rem] text-gray-400 truncate lg:hidden">Segmentovaný progress bar, počítadlo kroků</div>
+                    <div class="hidden lg:block text-sm text-gray-500 mt-0.5">Segmentovaný progress bar s počítadlem kroků. Čistý, jednoduchý design bez vizuálních rušivých prvků.</div>
+                </div>
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-300 group-hover:text-gray-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            <a href="./proto-refined/" class="group flex items-center gap-3 lg:gap-5 bg-white rounded-xl border border-gray-200 px-4 py-3 lg:px-6 lg:py-5 hover:border-gray-400 hover:shadow-md transition-all duration-200">
+                <span class="text-[0.55rem] lg:text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">v2</span>
+                <div class="flex-grow min-w-0">
+                    <div class="text-sm lg:text-lg font-medium text-black">Refined</div>
+                    <div class="text-[0.6rem] text-gray-400 truncate lg:hidden">Krokový stepper s kolečky, fajfkami a tužkou</div>
+                    <div class="hidden lg:block text-sm text-gray-500 mt-0.5">Krokový stepper s kolečky, fajfkami a ikonou tužky. Vizuálně propracovanější navigace mezi kroky.</div>
+                </div>
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-300 group-hover:text-gray-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            <a href="./proto-cards/" class="group flex items-center gap-3 lg:gap-5 bg-white rounded-xl border border-gray-200 px-4 py-3 lg:px-6 lg:py-5 hover:border-gray-400 hover:shadow-md transition-all duration-200">
+                <span class="text-[0.55rem] lg:text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">v3</span>
+                <div class="flex-grow min-w-0">
+                    <div class="text-sm lg:text-lg font-medium text-black">Cards</div>
+                    <div class="text-[0.6rem] text-gray-400 truncate lg:hidden">Horizontální swipovatelné karty, navigační tečky</div>
+                    <div class="hidden lg:block text-sm text-gray-500 mt-0.5">Horizontální swipovatelné karty s navigačními tečkami. Na mobilu swipe gestem, na desktopu šipkami.</div>
+                </div>
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-300 group-hover:text-gray-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            <a href="./proto-glass/" class="group flex items-center gap-3 lg:gap-5 bg-white rounded-xl border border-gray-200 px-4 py-3 lg:px-6 lg:py-5 hover:border-gray-400 hover:shadow-md transition-all duration-200">
+                <span class="text-[0.55rem] lg:text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">v4</span>
+                <div class="flex-grow min-w-0">
+                    <div class="text-sm lg:text-lg font-medium text-black">Liquid Glass</div>
+                    <div class="text-[0.6rem] text-gray-400 truncate lg:hidden">Glassmorphism, tmavé téma — inspirováno iOS</div>
+                    <div class="hidden lg:block text-sm text-gray-500 mt-0.5">Glassmorphism s tmavým tématem a animovaným pozadím. Experiment inspirovaný Liquid Glass designem z&nbsp;iOS.</div>
+                </div>
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-300 group-hover:text-gray-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            <a href="./proto-visual/" class="group flex items-center gap-3 lg:gap-5 bg-white rounded-xl border border-gray-200 border-dashed px-4 py-3 lg:px-6 lg:py-5 hover:border-gray-400 hover:shadow-md transition-all duration-200 opacity-75 hover:opacity-100">
+                <span class="text-[0.55rem] lg:text-xs font-bold uppercase tracking-wider text-white bg-gray-400 px-2 py-0.5 rounded-full shrink-0">v5</span>
+                <div class="flex-grow min-w-0">
+                    <div class="text-sm lg:text-lg font-medium text-black flex items-center gap-2">Visual Explorer <span class="text-[0.5rem] lg:text-[0.6rem] font-semibold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">~30 %</span></div>
+                    <div class="text-[0.6rem] text-gray-400 truncate lg:hidden">Interaktivní hotspoty, zoom na detail</div>
+                    <div class="hidden lg:block text-sm text-gray-500 mt-0.5">Interaktivní hotspoty na košili, zoom na detail, sidebar a bottom-sheet. Rozpracovaný koncept — implementačně výrazně náročnější.</div>
+                </div>
+                <svg class="w-4 h-4 lg:w-5 lg:h-5 text-gray-300 group-hover:text-gray-600 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-3 lg:py-4">
+        <span class="text-[0.55rem] lg:text-xs text-gray-300 uppercase tracking-wider">LUKO s.r.o. — Interní použití</span>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfigurátor Košil - Visual Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animation & Transitions */
+        #visual-container {
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: center center;
+            will-change: transform;
+        }
+
+        .hotspot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+            z-index: 20;
+        }
+        
+        .hotspot::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: black;
+            border-radius: 50%;
+        }
+
+        .hotspot:hover {
+            transform: scale(1.2);
+            background: white;
+        }
+
+        .hotspot::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid black;
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Panel transitions */
+        .panel-slide-enter { transform: translateX(100%); }
+        .panel-slide-enter-active { transform: translateX(0); }
+        .panel-slide-exit { transform: translateX(0); }
+        .panel-slide-exit-active { transform: translateX(100%); }
+
+        .sheet-slide-enter { transform: translateY(100%); }
+        .sheet-slide-enter-active { transform: translateY(0); }
+        
+        /* Loading Overlay */
+        #loading-overlay {
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Custom image transitions */
+         #main-shirt {
+            transition: opacity 0.3s ease;
+        }
+
+    </style>
+</head>
+<body class="bg-[#f0f0f0] text-gray-900 relative">
+
+<!-- MAIN VISUAL AREA -->
+<div class="absolute inset-0 flex items-center justify-center overflow-hidden" onclick="resetView(event)">
+    <div id="visual-container" class="relative w-full h-full max-w-[800px] flex items-center justify-center pointer-events-auto">
+        
+        <!-- Shirt Image -->
+        <img id="main-shirt" src="./images/cuts/regular.png" class="max-h-[85vh] w-auto max-w-[90vw] object-contain drop-shadow-2xl select-none pointer-events-none transition-all duration-300">
+        
+        <!-- Color Blending Overlay (mix-blend-mode: multiply to tint the shirt) -->
+        <div id="color-overlay" class="absolute inset-0 bg-transparent mix-blend-multiply transition-colors duration-300 pointer-events-none z-10" style="background-color: transparent;"></div>
+        
+        <!-- HOTSPOTS (Positioned relatively to container approx center) -->
+        <!-- Coordinates would ideally be relative to the image size, but for prototype we approximate with % on a centered container -->
+        
+        <!-- Collar -->
+        <button class="hotspot" style="top: 15%; left: 50%; transform: translate(-50%, -50%);" onclick="activateSection('collar', event)" aria-label="Límec"></button>
+        
+        <!-- Cuff (Right Arm) -->
+        <button class="hotspot" style="top: 55%; left: 22%;" onclick="activateSection('cuff', event)" aria-label="Manžeta"></button>
+        
+        <!-- Sleeve (Left Arm) -->
+        <button class="hotspot" style="top: 40%; left: 78%;" onclick="activateSection('sleeve', event)" aria-label="Rukáv"></button>
+        
+        <!-- Cut/Torso -->
+        <button class="hotspot" style="top: 50%; left: 50%; transform: translate(-50%, -50%);" onclick="activateSection('cut', event)" aria-label="Střih"></button>
+        
+        <!-- Buttons (Center Placket) -->
+        <button class="hotspot" style="top: 30%; left: 50%; transform: translate(-50%, -50%);" onclick="activateSection('buttons', event)" aria-label="Knoflíky"></button>
+        
+         <!-- Material (Hem/Bottom) -->
+        <button class="hotspot" style="top: 75%; left: 50%; transform: translate(-50%, -50%);" onclick="activateSection('material', event)" aria-label="Materiál"></button>
+
+    </div>
+</div>
+
+<!-- TOP BAR -->
+<header class="absolute top-0 left-0 right-0 p-6 flex justify-between items-start pointer-events-none">
+    <div>
+        <div class="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">Luko Configurator</div>
+        <h1 class="text-xl font-bold text-gray-900 pointer-events-auto cursor-pointer" onclick="toggleSummary()">Visual Explorer <span class="text-gray-400 font-normal">v1</span></h1>
+    </div>
+    <div class="pointer-events-auto">
+        <button class="bg-black text-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider rounded-full shadow-lg hover:bg-gray-800 transition transform hover:scale-105" onclick="finishOrder()">
+            Objednat
+        </button>
+    </div>
+</header>
+
+<!-- SUMMARY INDICATORS (Bottom Left Desktop / Top Left Mobile hidden) -->
+<div class="absolute bottom-6 left-6 pointer-events-none hidden md:block">
+    <div class="bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-sm border border-gray-100 text-sm text-gray-500 space-y-1 w-56">
+        <div class="flex justify-between"><span class="uppercase tracking-wider text-xs">Střih</span> <span id="ind-cut" class="font-medium text-black">Regular</span></div>
+        <div class="flex justify-between"><span class="uppercase tracking-wider text-xs">Materiál</span> <span id="ind-mat" class="font-medium text-black">60/40</span></div>
+        <div class="flex justify-between"><span class="uppercase tracking-wider text-xs">Barva</span> <span id="ind-clr" class="font-medium text-black">Bílá</span></div>
+    </div>
+</div>
+
+<!-- SIDEBAR / BOTTOM SHEET CONTAINER -->
+<div id="controls-panel" class="absolute inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-2xl transform translate-x-full transition-transform duration-500 z-40 flex flex-col pointer-events-auto rounded-l-2xl md:rounded-l-none overflow-hidden">
+    
+    <!-- Controls Header -->
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div>
+            <span id="panel-step-num" class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">01</span>
+            <h2 id="panel-title" class="text-2xl font-serif">Název sekce</h2>
+        </div>
+        <button onclick="zoomOutAndClose()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+    
+    <!-- Controls Content -->
+    <div id="panel-content" class="flex-grow overflow-y-auto p-6 space-y-4">
+        <!-- Content injected via JS -->
+    </div>
+
+    <!-- Navigation Footer -->
+     <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end items-center">
+         <button onclick="zoomOutAndClose()" class="bg-black text-white px-6 py-3 text-xs font-bold uppercase tracking-wider rounded-sm shadow-md hover:bg-gray-800 transition">Potvrdit</button>
+     </div>
+</div>
+
+<!-- MOBILE BOTTOM SHEET OVERRIDE STYLES (via JS logic mostly, keeping CSS simple) -->
+<!-- On mobile, we want this to be fixed bottom 0, h-auto, max-h-80vh, rounded-t-2xl, translate-y instead of x -->
+
+<script>
+    // DATA
+    const productData = {
+        cut: {
+            title: "Střih košile",
+            options: [
+                { id: 'regular', name: 'Regular', desc: 'Klasický rovný střih', img: './images/cuts/regular.png' },
+                { id: 'slim', name: 'Slim', desc: 'Mírně vypasovaný', img: './images/cuts/slim.png' },
+                { id: 'slim-fit', name: 'Slim Fit', desc: 'Těsně u těla', img: './images/cuts/extra-slim.png' }
+            ]
+        },
+        collar: {
+            title: "Tvar límce",
+            options: [
+                { id: 'stojacek', name: 'Stojáček', desc: 'Moderní, minimalistický', img: './images/collars/stand.png' },
+                { id: 'propnuty', name: 'Propnutý', desc: 'S knoflíčky (Button-down)', img: './images/collars/button-down.png' },
+                { id: 'kent', name: 'Kent', desc: 'Klasický byznys', img: './images/collars/kent.png' }
+            ]
+        },
+        cuff: {
+            title: "Typ manžety",
+            options: [
+                { id: 'kulata', name: 'Kulatá', desc: 'Standardní 1 knoflík', img: './images/cuffs/rounded.png' },
+                { id: 'hranata', name: 'Hranatá', desc: 'Zkosené rohy', img: './images/cuffs/mitered.png' },
+                { id: 'ohrnovaci', name: 'Francouzská', desc: 'Na manžetové knoflíčky', img: './images/cuffs/french.png' }
+            ]
+        },
+        sleeve: {
+            title: "Délka rukávu",
+            options: [
+                { id: 'dlouhy', name: 'Dlouhý', desc: 'Standardní', img: './images/sleeves/long.png' },
+                { id: 'kratky', name: 'Krátký', desc: 'Letní varianta', img: './images/sleeves/short.png' },
+                { id: 'ohrnovaci', name: 'Ohrnovací', desc: 'Dlouhý s páskem', img: './images/sleeves/roll-up.png' }
+            ]
+        },
+         material: {
+            title: "Materiál",
+            options: [
+                { id: '60/40', name: '60% Bavlna / 40% PES', desc: 'Odolná směs', img: null },
+                { id: '100% Bavlna', name: '100% Bavlna', desc: 'Easy Care úprava', img: null }
+            ]
+        },
+        buttons: { // Mapping buttons to color for simplicity in prototype
+            title: "Barva knoflíčků",
+            options: [
+                { id: 'bila', name: 'Bílá', desc: '', color: '#fff' },
+                { id: 'cerna', name: 'Černá', desc: '', color: '#000' },
+                { id: 'modra', name: 'Modrá', desc: '', color: '#2563eb' }
+            ]
+        },
+        shirtColor: {
+            title: "Barva košile",
+            options: [
+                { id: 'bila', name: 'Bílá', desc: '', color: '#ffffff' },
+                { id: 'svetle-modra', name: 'Sv. Modrá', desc: '', color: '#bfdbfe' }, // blue-200
+                { id: 'kralovska-modra', name: 'Královská Modrá', desc: '', color: '#1e3a8a' }, // blue-900
+                { id: 'cerna', name: 'Černá', desc: '', color: '#111827' }, // gray-900
+                { id: 'vinova', name: 'Vínová', desc: '', color: '#881337' } // rose-900
+            ]
+        }
+    };
+
+    const state = {
+        cut: 'regular',
+        collar: 'stojacek',
+        cuff: 'kulata',
+        sleeve: 'dlouhy',
+        material: '60/40',
+        buttons: 'bila',
+        shirtColor: 'bila'
+    };
+
+    // STATE MANAGEMENT
+    let activeSectionId = null;
+    const isMobile = window.innerWidth < 768;
+
+    function activateSection(sectionId, event) {
+        // Prevent clicking background when clicking hotspot
+        if(event) event.stopPropagation();
+
+        activeSectionId = sectionId;
+        
+        // 1. ZOOM EFFECT
+        applyZoom(sectionId);
+
+        // 2. OPEN PANEL
+        populatePanel(sectionId);
+        openPanel();
+
+        // Hide other hotspots? Maybe for cleaner view
+        toggleHotspots(false);
+    }
+
+    function applyZoom(sectionId) {
+        const container = document.getElementById('visual-container');
+        
+        // Define zoom coordinates per section (Approximate for prototype)
+        // Values are percentage offsets from center.
+        // Scale 2 feels good for mobile details.
+        
+        let tx = 0, ty = 0, scale = 1;
+        
+        if (isMobile) {
+             // Mobile Zoom Logic
+            scale = 1.6;
+            if(sectionId === 'collar') { ty = 35; } 
+            else if(sectionId === 'cuff') { ty = -20; tx = -20; }
+            else if(sectionId === 'sleeve') { ty = -10; tx = 20; }
+            else if(sectionId === 'buttons') { ty = 10; scale = 1.3;}
+            else if(sectionId === 'material') { ty = -30; scale = 1.3; } // Show bottom hem
+            else { scale = 1.1; ty = 0; } // Cut - show mostly full body
+        } else {
+             // Desktop Zoom Logic - Shift to Left to make room for sidebar
+            scale = 1.5;
+             // Move shirt to left (tx negative) to balance sidebar on right
+            const baseShift = -25; 
+            
+            if(sectionId === 'collar') { ty = 42; tx = baseShift; }
+            else if(sectionId === 'cuff') { ty = -25; tx = baseShift - 10; }
+            else if(sectionId === 'sleeve') { ty = 0; tx = baseShift + 10; }
+            else { scale = 1.1; tx = baseShift; }
+        }
+
+        container.style.transform = `scale(${scale}) translate(${tx}%, ${ty}%)`;
+    }
+
+    function resetView(event) {
+        // Only if clicking background and panel is open
+        const panel = document.getElementById('controls-panel');
+        // Check if panel is open via class check or state
+        // For now just always try to reset
+        
+        zoomOutAndClose();
+    }
+
+    function zoomOutAndClose() {
+        const container = document.getElementById('visual-container');
+        container.style.transform = 'scale(1) translate(0, 0)';
+        
+        // Restore Base Image (Cut)
+        const baseImg = productData.cut.options.find(o => o.id === state.cut).img;
+        if(baseImg) document.getElementById('main-shirt').src = baseImg;
+
+        closePanel();
+        toggleHotspots(true);
+        activeSectionId = null;
+    }
+
+    function toggleHotspots(show) {
+        document.querySelectorAll('.hotspot').forEach(el => {
+            el.style.opacity = show ? '1' : '0';
+            el.style.pointerEvents = show ? 'auto' : 'none';
+        });
+    }
+
+    // PANEL LOGIC
+    function openPanel() {
+        const panel = document.getElementById('controls-panel');
+        
+        if (isMobile) {
+            // Mobile: Bottom Sheet style
+            panel.classList.remove('translate-x-full', 'w-[400px]', 'inset-y-0', 'right-0', 'rounded-l-2xl');
+            panel.classList.add('fixed', 'bottom-0', 'left-0', 'right-0', 'w-full', 'h-[60vh]', 'rounded-t-2xl', 'translate-y-full', 'transition-transform');
+            
+            // Force reflow
+            void panel.offsetWidth;
+            
+            panel.classList.remove('translate-y-full'); 
+            panel.classList.add('translate-y-0', 'shadow-[0_-5px_20px_rgba(0,0,0,0.2)]');
+            
+        } else {
+            // Desktop: Sidebar
+            panel.classList.remove('translate-x-full');
+        }
+    }
+
+    function closePanel() {
+        const panel = document.getElementById('controls-panel');
+        if(isMobile) {
+             panel.classList.add('translate-y-full'); 
+             panel.classList.remove('translate-y-0');
+        } else {
+            panel.classList.add('translate-x-full');
+        }
+    }
+
+    function populatePanel(sectionId) {
+        const data = productData[sectionId];
+        if(!data) return;
+
+        document.getElementById('panel-title').innerText = data.title;
+        document.getElementById('panel-step-num').innerText = "VÝBĚR"; // Dynamic step num skipped for proto
+
+        const content = document.getElementById('panel-content');
+        content.innerHTML = ''; // Clear
+
+        data.options.forEach(opt => {
+            const isSelected = state[sectionId] === opt.id;
+            
+            // Card Template
+            const btn = document.createElement('button');
+            btn.className = `w-full text-left p-4 rounded-xl border-2 transition-all flex items-center space-x-4 ${isSelected ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-300 bg-white'}`;
+            btn.onclick = () => selectOption(sectionId, opt.id);
+            
+            // Image or Color Preview
+            let preview = '';
+            if (opt.img) {
+                // Circular cutout of the option image
+                preview = `<div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-gray-100"><img src="${opt.img}" class="w-full h-full object-cover"></div>`;
+            } else if (opt.color) {
+                 preview = `<div class="w-12 h-12 rounded-full shadow-sm shrink-0 border border-gray-200" style="background-color: ${opt.color}"></div>`;
+            } else {
+                 // Fallback icon
+                 preview = `<div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center shrink-0 font-bold text-gray-400">${opt.name[0]}</div>`;
+            }
+
+            btn.innerHTML = `
+                ${preview}
+                <div class="flex-grow">
+                    <div class="font-bold text-sm uppercase tracking-wide text-black">${opt.name}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">${opt.desc}</div>
+                </div>
+                ${isSelected ? '<div class="w-2 h-2 rounded-full bg-black"></div>' : ''}
+            `;
+            
+            content.appendChild(btn);
+        });
+    }
+
+    function selectOption(section, value) {
+        state[section] = value;
+        
+        // Update Visuals
+        const imgEl = document.getElementById('main-shirt');
+        const data = productData[section];
+        const selectedOpt = data.options.find(o => o.id === value);
+        
+        // In this prototype, we only trigger main image update if we have a mapped image for the whole shirt
+        // Re-using the same image assets as Scrolly/Minimal
+        // Logic: if Cut, Collar, Sleeve, Cuff change, we try to update the main image source.
+        
+        // NOTE: Since assets are minimal, we might not have every combination.
+        // We will do a best effort replacement similar to Scrolly.
+        if (selectedOpt && selectedOpt.img) {
+            // FAKE LOADING
+            imgEl.style.opacity = 0.8;
+            setTimeout(() => {
+                imgEl.src = selectedOpt.img; // Direct replace for Cut/Collar/Sleeve view
+                imgEl.style.opacity = 1;
+            }, 150);
+        }
+
+        // Color Blending Logic
+        if (section === 'shirtColor' && selectedOpt && selectedOpt.color) {
+            const overlay = document.getElementById('color-overlay');
+            if(selectedOpt.id === 'bila') {
+                overlay.style.backgroundColor = 'transparent';
+            } else {
+                overlay.style.backgroundColor = selectedOpt.color;
+            }
+        }
+
+        // Re-render panel to show selection state
+        populatePanel(section);
+        updateIndicators();
+    }
+
+    function updateIndicators() {
+        // Update small summary text
+        const getLabel = (sec) => {
+            const opt = productData[sec]?.options.find(o => o.id === state[sec]);
+            return opt ? opt.name : state[sec];
+        };
+        
+        if(document.getElementById('ind-cut')) document.getElementById('ind-cut').innerText = getLabel('cut');
+        if(document.getElementById('ind-mat')) document.getElementById('ind-mat').innerText = getLabel('material');
+        if(document.getElementById('ind-clr')) document.getElementById('ind-clr').innerText = getLabel('shirtColor');
+    }
+
+    function finishOrder() {
+        alert("Objednávka (simulace): \n" + JSON.stringify(state, null, 2));
+    }
+    
+    // Init
+    updateIndicators();
+    
+    // Resize Listener
+    window.addEventListener('resize', () => {
+        // Reset view on resize to avoid weird transforms
+        // zoomOutAndClose(); 
+    });
+
+</script>
+</body>
+</html>
