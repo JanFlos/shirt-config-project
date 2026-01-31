@@ -13,7 +13,7 @@
         .cards-track {
             display: flex;
             overflow-x: auto;
-            scroll-snap-type: x mandatory;
+            scroll-snap-type: x proximity;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             gap: 0;
@@ -66,13 +66,10 @@
             width: 24px;
             border-radius: 4px;
         }
-        .arrow-btn {
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .cards-wrapper:hover .arrow-btn {
-            opacity: 1;
-        }
+
+        /* Hide scrollbar but keep scroll */
+        .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scroll-hide::-webkit-scrollbar { display: none; }
 
         /* === STEPPER (desktop) === */
         .stepper-circle {
@@ -110,10 +107,10 @@
 <div class="h-[100dvh] flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="shrink-0 px-6 lg:px-8 lg:pt-6 lg:pb-0 pt-5 pb-3">
+    <header class="shrink-0 px-6 lg:px-8 lg:pt-6 lg:pb-0 pt-3 pb-1">
         <div class="text-center lg:text-left lg:max-w-2xl lg:mx-auto">
             <span class="text-[0.6rem] text-gray-400 font-medium uppercase tracking-[0.25em]">LUKO KOŠILE NA MÍRU</span>
-            <h1 id="card-title" class="text-lg font-semibold text-black mt-1">Materiál</h1>
+            <h1 id="card-title" class="hidden lg:block text-lg font-semibold text-black mt-1">Materiál</h1>
         </div>
 
         <!-- Stepper (desktop only) -->
@@ -122,11 +119,6 @@
 
     <!-- === MOBILE: Carousel content area === -->
     <div id="mobile-area" class="lg:hidden flex-grow min-h-0 relative cards-wrapper flex items-center">
-        <!-- Left Arrow -->
-        <button onclick="scrollToPrev()" class="arrow-btn absolute left-2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-500 hover:text-black hover:shadow-lg transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-
         <!-- Cards Track -->
         <div id="cards-track" class="cards-track w-full h-full py-4 items-stretch">
 
@@ -290,36 +282,32 @@
             </div>
 
             <!-- Card 9: Shrnutí -->
-            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col" data-step="8">
-                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-1 lg:hidden">Krok 9 / 9</div>
-                <div class="text-base font-semibold mb-4 lg:hidden">Shrnutí a odeslání</div>
-                <div class="flex-grow overflow-y-auto max-w-lg mx-auto w-full">
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[0.7rem] mb-4">
-                        <div class="text-gray-400 py-0.5">Materiál</div><div id="s-mat" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Střih</div><div id="s-cut" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Límec</div><div id="s-col" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Rukáv</div><div id="s-slv" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Manžeta</div><div id="s-cuf" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Knoflíčky</div><div id="s-btn" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Barva</div><div id="s-clr" class="font-medium text-black text-right py-0.5">-</div>
-                        <div class="text-gray-400 py-0.5">Velikost</div><div id="s-siz" class="font-medium text-black text-right py-0.5">-</div>
+            <div class="card bg-white rounded-2xl shadow-sm border border-gray-200 p-4 lg:p-6 flex flex-col" data-step="8">
+                <div class="text-[0.6rem] text-gray-400 uppercase tracking-wider font-semibold mb-0.5 lg:hidden">Krok 9 / 9</div>
+                <div class="text-base font-semibold mb-2 lg:hidden">Shrnutí</div>
+                <div class="flex-grow overflow-y-auto scroll-hide max-w-lg mx-auto w-full">
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-0 text-[0.65rem] mb-2">
+                        <div class="text-gray-400 py-px">Materiál</div><div id="s-mat" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Střih</div><div id="s-cut" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Límec</div><div id="s-col" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Rukáv</div><div id="s-slv" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Manžeta</div><div id="s-cuf" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Knoflíčky</div><div id="s-btn" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Barva</div><div id="s-clr" class="font-medium text-black text-right py-px">-</div>
+                        <div class="text-gray-400 py-px">Velikost</div><div id="s-siz" class="font-medium text-black text-right py-px">-</div>
                     </div>
-                    <div class="border-t border-gray-100 pt-3 space-y-2">
-                        <input id="f-name" type="text" placeholder="Jméno a Příjmení *" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
-                        <input id="f-email" type="email" placeholder="Email *" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
-                        <input type="tel" placeholder="Telefon" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent">
-                        <textarea placeholder="Poznámka" rows="1" class="w-full border-b border-gray-200 py-2 text-sm focus:outline-none focus:border-black bg-transparent resize-none"></textarea>
+                    <div class="border-t border-gray-100 pt-2 space-y-1.5">
+                        <input id="f-name" type="text" placeholder="Jméno a Příjmení *" class="w-full border-b border-gray-200 py-1.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <input id="f-email" type="email" placeholder="Email *" class="w-full border-b border-gray-200 py-1.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <input type="tel" placeholder="Telefon" class="w-full border-b border-gray-200 py-1.5 text-sm focus:outline-none focus:border-black bg-transparent">
+                        <textarea placeholder="Poznámka" rows="1" class="w-full border-b border-gray-200 py-1.5 text-sm focus:outline-none focus:border-black bg-transparent resize-none"></textarea>
                     </div>
-                    <button type="button" onclick="submitOrder()" class="w-full mt-4 bg-black text-white py-3.5 text-xs tracking-[0.2em] uppercase hover:bg-gray-800 transition rounded-lg font-semibold">Objednat</button>
+                    <button type="button" onclick="submitOrder()" class="w-full mt-3 bg-black text-white py-3 text-xs tracking-[0.2em] uppercase hover:bg-gray-800 transition rounded-lg font-semibold">Objednat</button>
                 </div>
             </div>
 
         </div>
 
-        <!-- Right Arrow -->
-        <button onclick="scrollToNext()" class="arrow-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-500 hover:text-black hover:shadow-lg transition-all">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
     </div>
 
     <!-- === DESKTOP: Wizard content area === -->
